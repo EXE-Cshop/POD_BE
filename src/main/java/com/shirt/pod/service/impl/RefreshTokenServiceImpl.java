@@ -6,6 +6,7 @@ import com.shirt.pod.exception.ErrorCode;
 import com.shirt.pod.model.entity.RefreshToken;
 import com.shirt.pod.model.entity.User;
 import com.shirt.pod.repository.RefreshTokenRepository;
+import com.shirt.pod.security.JwtTokenProvider;
 import com.shirt.pod.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProperties jwtProperties;
-    private final com.shirt.pod.security.JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider tokenProvider;
 
     @Override
     @Transactional

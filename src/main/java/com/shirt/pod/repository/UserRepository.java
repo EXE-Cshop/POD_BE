@@ -20,7 +20,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.email = :email")
     Optional<User> findByEmailWithAuthorities(@Param("email") String email);
 
-//    Optional<User> findByEmailAndProvider(String email, String provider);
-
-//    Optional<User> findByProviderId(String providerId);
 }

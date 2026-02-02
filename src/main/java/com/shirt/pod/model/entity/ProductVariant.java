@@ -2,9 +2,12 @@ package com.shirt.pod.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,27 +24,20 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductVariant extends BaseEntity {
-
-    @Column(name = "color_name")
-    private String colorName;
-
-    @Column(name = "color_hex")
-    private String colorHex;
-
-    private String size;
-
+public class ProductVariant extends BaseEntityCreatedOnly {
+    private String colorName; // Màu Đen
+    private String colorHex; // #000000
+    private String size; // S, M, L, XL
     @Column(unique = true)
-    private String sku;
-
-    @Column(name = "stock_quantity")
+    private String sku; // Mã quản lý kho (ví dụ: TEE-BLK-L)
     private Integer stockQuantity;
-
-    @Column(name = "image_url")
-    private String imageUrl;
-
-    @Column(name = "price_adjustment")
-    private BigDecimal priceAdjustment;
-
+    // QUAN TRỌNG: Ảnh mockup phôi màu này (Chưa có hình in)
+    // Dùng làm background cho khách kéo thả thiết kế
+    private String frontImageUrl;
+    private String backImageUrl;
+    private BigDecimal priceAdjustment; // Giá cộng thêm (ví dụ size XXL đắt hơn 10k)
     private Boolean active;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "base_product_id")
+    private BaseProduct baseProduct;
 }
