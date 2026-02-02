@@ -25,7 +25,6 @@ public class ApiResponse<T> implements Serializable {
      T data;
      int code;
      String message;
-
      @Builder.Default
      long timestamp = Instant.now().toEpochMilli();
 }

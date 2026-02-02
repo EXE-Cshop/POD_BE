@@ -23,16 +23,24 @@ import java.util.List;
 @Builder
 public class BaseProduct extends BaseEntity {
 
-    @Column(nullable = false)
-    private String name;
+    private String name; // Ví dụ: Áo thun Cotton 4 chiều
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "base_price", nullable = false)
-    private BigDecimal basePrice;
+    @Column(name = "base_price")
+    private BigDecimal basePrice; // Giá gốc chưa tính công in và biến thể
 
-    private String material;
+    private String material; // Chất liệu: 100% Cotton, Canvas...
+
+    private String printTechnology; // Công nghệ in mặc định: DTG, Decal, In chuyển nhiệt
 
     private Boolean active;
+
+    @OneToMany(mappedBy = "baseProduct", cascade = CascadeType.ALL)
+    private List<PrintArea> printAreas; // Một áo có nhiều vùng in (trước, sau)
+
+    @OneToMany(mappedBy = "baseProduct", cascade = CascadeType.ALL)
+    private List<ProductVariant> variants; // Một áo có nhiều màu, size
 
 }

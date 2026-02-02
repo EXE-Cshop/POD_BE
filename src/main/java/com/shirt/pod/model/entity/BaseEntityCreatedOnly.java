@@ -14,11 +14,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
-/**
- * Base entity CHỈ có created fields
- * Dùng cho các entity KHÔNG CẦN track modified (Order, Payment, OrderItem,
- * etc.)
- */
 @Getter
 @Setter
 @MappedSuperclass

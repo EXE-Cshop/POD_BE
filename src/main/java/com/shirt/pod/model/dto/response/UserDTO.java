@@ -1,7 +1,6 @@
 package com.shirt.pod.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.shirt.pod.model.entity.enums.Role;
 import com.shirt.pod.model.entity.enums.UserStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,7 +28,7 @@ public class UserDTO implements Serializable {
     String phoneNumber;
     String avatarUrl;
     UserStatus status;
-    Set<Role> roles;
+    List<String> roles;
     Instant createdDate;
     Instant modifiedDate;
     String createdBy;
