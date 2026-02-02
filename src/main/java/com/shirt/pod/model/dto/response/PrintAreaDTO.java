@@ -1,6 +1,6 @@
 package com.shirt.pod.model.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.shirt.pod.model.entity.enums.PrintAreaName;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,22 +11,28 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class PrintAreaDTO implements Serializable {
 
     Long id;
     Long baseProductId;
-    String name;
+    String baseProductName;
+    PrintAreaName name;
+    String nameDisplay; // Display name from enum
     BigDecimal widthMm;
     BigDecimal heightMm;
-    BigDecimal topOffsetMm;
-    BigDecimal leftOffsetMm;
+    Double topOffsetPercent;
+    Double leftOffsetPercent;
+    Double widthPercent;
+    Double heightPercent;
     String maskImageUrl;
+    Instant createdDate;
+    String createdBy;
 }

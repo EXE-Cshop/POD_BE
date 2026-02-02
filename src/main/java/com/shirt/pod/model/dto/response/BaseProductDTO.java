@@ -18,20 +18,17 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductVariantDTO implements Serializable {
+public class BaseProductDTO implements Serializable {
 
     Long id;
-    Long baseProductId;
-    String baseProductName;
-    String colorName;
-    String colorHex;
-    String size;
-    String sku;
-    Integer stockQuantity;
-    String frontImageUrl;
-    String backImageUrl;
-    BigDecimal priceAdjustment;
+    String name;
+    String description;
+    BigDecimal basePrice;
+    String material;
+    String printTechnology;
     Boolean active;
     Instant createdDate;
+    Instant modifiedDate;
     String createdBy;
+    String modifiedBy;
 }

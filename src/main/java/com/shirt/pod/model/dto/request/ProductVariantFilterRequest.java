@@ -1,4 +1,4 @@
-package com.shirt.pod.model.dto.response;
+package com.shirt.pod.model.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,8 +9,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -18,20 +16,25 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductVariantDTO implements Serializable {
+public class ProductVariantFilterRequest implements Serializable {
 
-    Long id;
+    // Filter fields
     Long baseProductId;
-    String baseProductName;
     String colorName;
-    String colorHex;
-    String size;
+    String size; // Product size: S, M, L, XL
     String sku;
-    Integer stockQuantity;
-    String frontImageUrl;
-    String backImageUrl;
-    BigDecimal priceAdjustment;
     Boolean active;
-    Instant createdDate;
-    String createdBy;
+
+    // Pagination fields
+    @Builder.Default
+    Integer page = 1;
+
+    @Builder.Default
+    Integer pageSize = 10; // Page size for pagination
+
+    @Builder.Default
+    String sortBy = "createdDate";
+
+    @Builder.Default
+    String order = "DESC";
 }

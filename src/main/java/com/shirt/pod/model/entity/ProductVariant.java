@@ -24,36 +24,20 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductVariant {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    
-    @Column(name = "color_name")
-    private String colorName;
-
-    @Column(name = "color_hex")
-    private String colorHex;
-
-    private String size;
-
+public class ProductVariant extends BaseEntityCreatedOnly {
+    private String colorName; // Màu Đen
+    private String colorHex; // #000000
+    private String size; // S, M, L, XL
     @Column(unique = true)
-    private String sku;
-
-    @Column(name = "stock_quantity")
+    private String sku; // Mã quản lý kho (ví dụ: TEE-BLK-L)
     private Integer stockQuantity;
-
-    @Column(name = "image_url")
-    private String imageUrl;
-
-    @Column(name = "price_adjustment")
-    private BigDecimal priceAdjustment;
-
+    // QUAN TRỌNG: Ảnh mockup phôi màu này (Chưa có hình in)
+    // Dùng làm background cho khách kéo thả thiết kế
+    private String frontImageUrl;
+    private String backImageUrl;
+    private BigDecimal priceAdjustment; // Giá cộng thêm (ví dụ size XXL đắt hơn 10k)
     private Boolean active;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base_product_id", nullable = false)
+    @JoinColumn(name = "base_product_id")
     private BaseProduct baseProduct;
 }

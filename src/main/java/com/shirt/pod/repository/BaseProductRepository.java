@@ -1,7 +1,11 @@
 package com.shirt.pod.repository;
 
 import com.shirt.pod.model.entity.BaseProduct;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,23 +14,31 @@ import java.util.Optional;
 @Repository
 public interface BaseProductRepository extends JpaRepository<BaseProduct, Long> {
 
-    /**
-     * Tìm tất cả sản phẩm đang active
-     */
     List<BaseProduct> findByActiveTrue();
 
-    /**
-     * Tìm sản phẩm theo ID và đang active
-     */
     Optional<BaseProduct> findByIdAndActiveTrue(Long id);
 
-    /**
-     * Kiểm tra tên sản phẩm đã tồn tại chưa
-     */
     boolean existsByName(String name);
 
-    /**
-     * Kiểm tra tên sản phẩm đã tồn tại chưa (trừ sản phẩm hiện tại)
-     */
     boolean existsByNameAndIdNot(String name, Long id);
+
+    @Query(value = """
+            SELECT * FROM base_products bp
+            WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
+            AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
+            AND (:active IS NULL OR bp.active = :active)
+            """, countQuery = """
+            SELECT COUNT(*) FROM base_products bp
+            WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
+            AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
+            AND (:active IS NULL OR bp.active = :active)
+            """, nativeQuery = true)
+    Page<BaseProduct> searchWithFilters(
+            @Param("name") String name,
+            @Param("material") String material,
+            @Param("printTechnology") String printTechnology,
+            @Param("active") Boolean active,
+            Pageable pageable);
 }
