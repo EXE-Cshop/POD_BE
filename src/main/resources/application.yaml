@@ -22,7 +22,23 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     open-in-view: false
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
+server:
+  port: 8080
+
+# S3/MinIO Configuration
+s3:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: mybucket
+  region: us-east-1
 open:
   api:
     title: "C-Shop API"
