@@ -47,6 +47,7 @@ public enum ErrorCode {
   PASSWORD_TOO_WEAK(2011, "Password is too weak. Must contain at least 8 characters", HttpStatus.BAD_REQUEST),
   INVALID_ENUM_VALUE(2012, "Invalid value for {0}. Allowed values: {1}", HttpStatus.BAD_REQUEST),
   INVALID_PAGINATION(2013, "Invalid pagination parameters. Page: {0}, Size: {1}", HttpStatus.BAD_REQUEST),
+  INVALID_LAYER_TYPE(2014, "Invalid layer type: {0}. Allowed: image, text", HttpStatus.BAD_REQUEST),
 
   // ========== 30xx: Resource Not Found ==========
   USER_NOT_FOUND(3001, "User not found with {0}: {1}", HttpStatus.NOT_FOUND),
@@ -153,6 +154,11 @@ public enum ErrorCode {
   IMAGE_RESOLUTION_TOO_LOW(6011, "Image resolution is too low. Minimum: {0}x{1} pixels", HttpStatus.BAD_REQUEST),
   IMAGE_RESOLUTION_TOO_HIGH(6012, "Image resolution is too high. Maximum: {0}x{1} pixels", HttpStatus.BAD_REQUEST),
   INVALID_IMAGE_DIMENSIONS(6013, "Invalid image dimensions. Expected ratio: {0}", HttpStatus.BAD_REQUEST),
+
+  RENDER_FAILED(6014, "Render failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
+  IMAGE_READ_FAILED(6015, "Failed to read image from URL: {0}", HttpStatus.BAD_REQUEST),
+  IMAGE_RENDER_FAILED(6016, "Failed to render image layer: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
+  SAVE_IMAGE_FAILED(6017, "Failed to save rendered image: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
 
   EXCEL_HEADER_MISSING(6020, "Excel file is missing required headers: {0}", HttpStatus.BAD_REQUEST),
   EXCEL_PARSING_ERROR(6021, "Failed to parse Excel file at row {0}", HttpStatus.BAD_REQUEST),
