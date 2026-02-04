@@ -32,13 +32,12 @@ spring:
 server:
   port: 8080
 
-# S3/MinIO Configuration
-s3:
-  endpoint: http://localhost:9000
-  access-key: minioadmin
-  secret-key: minioadmin
-  bucket-name: mybucket
-  region: us-east-1
+# Cloudinary Configuration
+cloudinary:
+  cloud-name: di5j3h6wi
+  api-key: 227498933227112
+  api-secret: 9arlZHQ4JV8y3eS6ZH18hca1Vqg
+
 open:
   api:
     title: "C-Shop API"
