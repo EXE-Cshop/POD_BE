@@ -23,6 +23,9 @@ import java.math.BigDecimal;
 @Builder
 public class OrderItem extends BaseEntityCreatedOnly {
 
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
+
     private Integer quantity;
 
     @Column(name = "unit_price")
@@ -32,5 +35,5 @@ public class OrderItem extends BaseEntityCreatedOnly {
     private String printFileUrl;
 
     @Column(name = "production_status")
-    private String productionStatus; // WAITING, PRINTED...
+    private String productionStatus;
 }

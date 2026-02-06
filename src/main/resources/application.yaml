@@ -32,6 +32,18 @@ spring:
 server:
   port: 8080
 
+# DB Scheduler Configuration
+db-scheduler:
+  enabled: true
+  # Tự động tạo bảng scheduled_tasks nếu chưa có
+  auto-create-tables: true
+  # Số lượng luồng chạy task (mặc định 10)
+  threads: 5
+  # Bao lâu quét DB 1 lần (mặc định 10s)
+  polling-interval: 30s
+  # Tên bảng (mặc định scheduled_tasks)
+  table-name: scheduled_tasks
+
 # Cloudinary Configuration
 cloudinary:
   cloud-name: di5j3h6wi
