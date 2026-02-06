@@ -1,5 +1,6 @@
 package com.shirt.pod.model.dto.response;
 
+import com.shirt.pod.model.entity.enums.StockStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -17,19 +17,18 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductVariantDTO {
+public class VariantInventoryDTO {
 
-    Long id;
+    Long variantId;
     Long baseProductId;
     String baseProductName;
+    String sku;
     String colorName;
     String colorHex;
     String size;
-    String sku;
     Integer stockQuantity;
-    String frontImageUrl;
-    String backImageUrl;
-    BigDecimal priceAdjustment;
+    StockStatus stockStatus;       // IN_STOCK, OUT_OF_STOCK, LOW_STOCK
+    Integer lowStockThreshold;     // Ngưỡng cảnh báo tồn kho thấp
     Boolean active;
     Instant createdDate;
     String createdBy;

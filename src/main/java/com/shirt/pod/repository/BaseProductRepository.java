@@ -14,31 +14,44 @@ import java.util.Optional;
 @Repository
 public interface BaseProductRepository extends JpaRepository<BaseProduct, Long> {
 
-    List<BaseProduct> findByActiveTrue();
+        List<BaseProduct> findByActiveTrue();
 
-    Optional<BaseProduct> findByIdAndActiveTrue(Long id);
+        Optional<BaseProduct> findByIdAndActiveTrue(Long id);
 
-    boolean existsByName(String name);
+        boolean existsByName(String name);
 
-    boolean existsByNameAndIdNot(String name, Long id);
+        boolean existsByNameAndIdNot(String name, Long id);
 
-    @Query(value = """
-            SELECT * FROM base_products bp
-            WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
-            AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
-            AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
-            AND (:active IS NULL OR bp.active = :active)
-            """, countQuery = """
-            SELECT COUNT(*) FROM base_products bp
-            WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
-            AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
-            AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
-            AND (:active IS NULL OR bp.active = :active)
-            """, nativeQuery = true)
-    Page<BaseProduct> searchWithFilters(
-            @Param("name") String name,
-            @Param("material") String material,
-            @Param("printTechnology") String printTechnology,
-            @Param("active") Boolean active,
-            Pageable pageable);
+        @Query(value = """
+                        SELECT * FROM base_products bp
+                        WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
+                        AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
+                        AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
+                        AND (:active IS NULL OR bp.active = :active)
+                        """, countQuery = """
+                        SELECT COUNT(*) FROM base_products bp
+                        WHERE (:name IS NULL OR LOWER(bp.name) LIKE LOWER(CONCAT('%', :name, '%')))
+                        AND (:material IS NULL OR LOWER(bp.material) LIKE LOWER(CONCAT('%', :material, '%')))
+                        AND (:printTechnology IS NULL OR LOWER(bp.print_technology) LIKE LOWER(CONCAT('%', :printTechnology, '%')))
+                        AND (:active IS NULL OR bp.active = :active)
+                        """, nativeQuery = true)
+        Page<BaseProduct> searchWithFilters(
+                        @Param("name") String name,
+                        @Param("material") String material,
+                        @Param("printTechnology") String printTechnology,
+                        @Param("active") Boolean active,
+                        Pageable pageable);
+
+        @Query("SELECT DISTINCT p FROM BaseProduct p JOIN p.variants v " +
+                        "WHERE v.stockQuantity > 0 AND v.stockQuantity <= :threshold AND v.active = true AND p.active = true")
+        List<BaseProduct> findProductsWithLowStock(@Param("threshold") Integer threshold);
+
+        @Query("SELECT DISTINCT p FROM BaseProduct p JOIN p.variants v " +
+                        "WHERE v.stockQuantity = 0 AND v.active = true AND p.active = true")
+        List<BaseProduct> findProductsWithOutOfStock();
+
+        
+        @Query("SELECT DISTINCT p FROM BaseProduct p JOIN p.variants v " +
+                        "WHERE v.stockQuantity > :threshold AND v.active = true AND p.active = true")
+        List<BaseProduct> findProductsWithInStock(@Param("threshold") Integer threshold);
 }

@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Getter
@@ -21,7 +20,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class UpdateProductVariantRequest implements Serializable {
+public class UpdateProductVariantRequest {
 
     @Size(max = 50, message = "Color name must not exceed 50 characters")
     String colorName;

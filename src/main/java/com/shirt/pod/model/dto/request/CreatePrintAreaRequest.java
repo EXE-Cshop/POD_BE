@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Getter
@@ -20,7 +19,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class CreatePrintAreaRequest implements Serializable {
+public class CreatePrintAreaRequest {
 
     @Size(max = 50, message = "Print area name must not exceed 50 characters")
     @Builder.Default

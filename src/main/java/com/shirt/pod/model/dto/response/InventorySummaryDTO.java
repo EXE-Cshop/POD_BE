@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -17,20 +16,12 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductVariantDTO {
+public class InventorySummaryDTO {
 
-    Long id;
-    Long baseProductId;
-    String baseProductName;
-    String colorName;
-    String colorHex;
-    String size;
-    String sku;
-    Integer stockQuantity;
-    String frontImageUrl;
-    String backImageUrl;
-    BigDecimal priceAdjustment;
-    Boolean active;
-    Instant createdDate;
-    String createdBy;
+    Long totalProducts;           
+    Long totalVariants;           
+    Long inStockVariants;         
+    Long outOfStockVariants;      
+    Long lowStockVariants;         
+    BigDecimal totalStockValue;    
 }

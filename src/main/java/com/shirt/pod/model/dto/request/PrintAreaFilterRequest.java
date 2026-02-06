@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
-
 /**
  * Request object for filtering and pagination of PrintArea
  */
@@ -20,7 +18,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class PrintAreaFilterRequest implements Serializable {
+public class PrintAreaFilterRequest {
 
     // Filter fields
     Long baseProductId;
