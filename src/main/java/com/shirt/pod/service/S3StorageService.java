@@ -84,4 +84,43 @@ public class S3StorageService {
         int lastDotIndex = filename.lastIndexOf('.');
         return (lastDotIndex == -1) ? "" : filename.substring(lastDotIndex);
     }
+
+    /**
+     * Upload arbitrary byte[] as an object to S3 and return its URL.
+     * Dùng cho các file được generate trong backend (ví dụ ảnh render).
+     */
+    public String uploadBytes(byte[] data, String contentType, String fileExtension) {
+        if (data == null || data.length == 0) {
+            throw new AppException(ErrorCode.FILE_CORRUPTED);
+        }
+
+        try {
+            String safeExtension = (fileExtension == null || fileExtension.isBlank())
+                    ? ""
+                    : (fileExtension.startsWith(".") ? fileExtension : "." + fileExtension);
+
+            String key = UUID.randomUUID() + safeExtension;
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(s3Config.getBucketName())
+                    .key(key)
+                    .contentType(contentType != null ? contentType : "application/octet-stream")
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(data));
+
+            String url = String.format("%s/%s/%s",
+                    s3Config.getEndpoint(),
+                    s3Config.getBucketName(),
+                    key);
+            log.info("Bytes uploaded successfully to S3: key={}, size={}, contentType={}",
+                    key, data.length, contentType);
+            return url;
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error while uploading bytes to S3: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, e.getMessage());
+        }
+    }
 }

@@ -1,6 +1,6 @@
 package com.shirt.pod.controller;
 
-import com.shirt.pod.model.dto.request.RenderRequest;
+import com.shirt.pod.model.dto.request.RenderPrintRequest;
 import com.shirt.pod.model.dto.response.ApiResponse;
 import com.shirt.pod.model.dto.response.RenderResponse;
 import com.shirt.pod.service.RenderEngineService;
@@ -19,12 +19,15 @@ public class RenderController {
 
     private final RenderEngineService renderEngineService;
 
-    @PostMapping
-    public ApiResponse<RenderResponse> renderDesign(@Valid @RequestBody RenderRequest request) {
-        RenderResponse response = renderEngineService.renderDesign(request);
+    /**
+     * Render production print file (transparent PNG) using mm-based layers.
+     */
+    @PostMapping("/print")
+    public ApiResponse<RenderResponse> renderPrintFile(@Valid @RequestBody RenderPrintRequest request) {
+        RenderResponse response = renderEngineService.renderPrintFile(request);
         return ApiResponse.<RenderResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Render completed successfully")
+                .message("Print file rendered successfully")
                 .data(response)
                 .build();
     }

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
-@Slf4j
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(AppException.class)

@@ -13,11 +13,15 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Render request for production print files (POD).
+ * All layer coordinates/dimensions are expressed in millimeters (mm).
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RenderRequest {
+public class RenderPrintRequest {
 
     @NotNull(message = "Width (mm) is required")
     @JsonProperty("width_mm")
@@ -31,15 +35,26 @@ public class RenderRequest {
 
     @NotEmpty(message = "Design layers cannot be empty")
     @Valid
-    private List<DesignLayerRequest> layers;
+    private List<PrintDesignLayerRequest> layers;
 
-    @JsonProperty("background_image_url")
-    private String backgroundImageUrl;
-
+    /**
+     * Output DPI for rasterization. Typical: 300.
+     */
     @Builder.Default
     private Integer dpi = 300;
 
+    /**
+     * Output image format. Currently only PNG is supported.
+     */
     @JsonProperty("output_format")
     @Builder.Default
     private String outputFormat = "PNG";
+
+    /**
+     * For print files, background is usually transparent.
+     */
+    @JsonProperty("transparent_background")
+    @Builder.Default
+    private Boolean transparentBackground = true;
 }
+
