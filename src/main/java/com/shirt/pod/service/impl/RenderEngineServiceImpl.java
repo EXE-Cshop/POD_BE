@@ -6,7 +6,7 @@ import com.shirt.pod.model.dto.request.PrintDesignLayerRequest;
 import com.shirt.pod.model.dto.request.RenderPrintRequest;
 import com.shirt.pod.model.dto.response.RenderResponse;
 import com.shirt.pod.service.RenderEngineService;
-import com.shirt.pod.service.S3StorageService;
+import com.shirt.pod.service.UploadService;
 import com.shirt.pod.utils.UnitConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -37,7 +38,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
     private static final int DEFAULT_DPI = 300;
     private static final BigDecimal MIN_MM = new BigDecimal("0.1");
 
-    private final S3StorageService s3StorageService;
+    private final UploadService uploadService;
 
     @Override
     public RenderResponse renderPrintFile(RenderPrintRequest request) {
@@ -74,21 +75,22 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             g2d.dispose();
 
             // Ghi canvas ra byte[] (PNG)
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(canvas, "PNG", baos);
             byte[] bytes = baos.toByteArray();
 
             String fileUrl;
             long fileSize;
 
-            // Ưu tiên upload S3/MinIO, nếu fail thì fallback lưu local
+            // Ưu tiên upload qua UploadService (Cloudinary), nếu fail thì fallback lưu local
             try {
-                log.debug("Uploading rendered image to S3, size={} bytes", bytes.length);
-                fileUrl = s3StorageService.uploadBytes(bytes, "image/png", ".png");
+                log.debug("Uploading rendered image via UploadService (bytes), size={} bytes", bytes.length);
+                var uploadResult = uploadService.uploadImageBytes(bytes, "render.png", "image/png");
+                fileUrl = uploadResult.get("url");
                 fileSize = bytes.length;
-                log.info("Rendered print file uploaded to S3: {}", fileUrl);
+                log.info("Rendered print file uploaded via UploadService: {}", fileUrl);
             } catch (Exception ex) {
-                log.warn("Upload to S3 failed, fallback to local file storage. Reason: {}", ex.getMessage(), ex);
+                log.warn("Upload via UploadService failed, fallback to local file storage. Reason: {}", ex.getMessage(), ex);
                 File localFile = saveLocalPng(bytes);
                 fileUrl = localFile.getAbsolutePath();
                 fileSize = localFile.length();
@@ -258,7 +260,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
     }
 
     /**
-     * Lưu file PNG ra đĩa local khi không thể upload lên S3.
+     * Lưu file PNG ra đĩa local khi không thể upload qua service ngoài.
      */
     private File saveLocalPng(byte[] bytes) {
         try {
@@ -272,4 +274,5 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.SAVE_IMAGE_FAILED, e.getMessage());
         }
     }
+
 }
