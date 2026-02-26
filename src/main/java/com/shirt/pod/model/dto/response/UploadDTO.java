@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class UploadDTO {
     
     private String url;
+    private String publicId;
 }

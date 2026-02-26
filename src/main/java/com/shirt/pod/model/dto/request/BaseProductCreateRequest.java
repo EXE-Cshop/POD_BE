@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Getter
@@ -21,7 +20,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BaseProductCreateRequest implements Serializable {
+public class BaseProductCreateRequest {
 
     @NotBlank(message = "Product name is required")
     @Size(max = 255, message = "Product name must not exceed 255 characters")

@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Getter
@@ -22,7 +21,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class PrintAreaCreateRequest implements Serializable {
+public class PrintAreaCreateRequest {
 
     @NotNull(message = "Base product ID is required")
     Long baseProductId;

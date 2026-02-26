@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pod_db
     username: postgres
-    password: root
+    password: admin
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -32,13 +32,24 @@ spring:
 server:
   port: 8080
 
-# S3/MinIO Configuration
-s3:
-  endpoint: http://localhost:9000
-  access-key: minioadmin
-  secret-key: minioadmin
-  bucket-name: mybucket
-  region: us-east-1
+# DB Scheduler Configuration
+db-scheduler:
+  enabled: true
+  # Tự động tạo bảng scheduled_tasks nếu chưa có
+  auto-create-tables: true
+  # Số lượng luồng chạy task (mặc định 10)
+  threads: 5
+  # Bao lâu quét DB 1 lần (mặc định 10s)
+  polling-interval: 30s
+  # Tên bảng (mặc định scheduled_tasks)
+  table-name: scheduled_tasks
+
+# Cloudinary Configuration
+cloudinary:
+  cloud-name: di5j3h6wi
+  api-key: 227498933227112
+  api-secret: 9arlZHQ4JV8y3eS6ZH18hca1Vqg
+
 open:
   api:
     title: "C-Shop API"

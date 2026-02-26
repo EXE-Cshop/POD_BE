@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -20,7 +19,7 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductDTO implements Serializable {
+public class ProductDTO {
 
     Long id;
     String name;

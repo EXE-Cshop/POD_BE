@@ -8,15 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ProductVariantFilterRequest implements Serializable {
+public class ProductVariantFilterRequest {
 
     // Filter fields
     Long baseProductId;
