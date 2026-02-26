@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -19,7 +18,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class PrintAreaDTO implements Serializable {
+public class PrintAreaDTO {
 
     Long id;
     Long baseProductId;
