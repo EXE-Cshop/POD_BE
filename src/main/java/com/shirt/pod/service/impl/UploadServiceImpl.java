@@ -49,29 +49,7 @@ public class UploadServiceImpl implements UploadService {
         }
         
         try {
-            String uniqueFilename = UUID.randomUUID().toString() + "_" + System.currentTimeMillis();
-            
-            Map<String, Object> uploadParams = ObjectUtils.asMap(
-                    "folder", UPLOAD_FOLDER,
-                    "public_id", uniqueFilename,
-                    "resource_type", "image",
-                    "overwrite", false,
-                    "use_filename", false
-            );
-            
-            @SuppressWarnings("unchecked")
-            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
-            
-            String url = (String) uploadResult.get("secure_url");
-            String publicId = (String) uploadResult.get("public_id");
-            
-            log.info("File uploaded successfully to Cloudinary. PublicId: {}, URL: {}", publicId, url);
-            
-            Map<String, String> result = new HashMap<>();
-            result.put("url", url);
-            result.put("publicId", publicId);
-            
-            return result;
+            return doUpload(file.getBytes(), file.getContentType());
             
         } catch (AppException e) {
             throw e;
@@ -79,6 +57,66 @@ public class UploadServiceImpl implements UploadService {
             log.error("Error while uploading file to Cloudinary: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, String> uploadImageBytes(byte[] bytes, String filename, String contentType) {
+        if (bytes == null || bytes.length == 0) {
+            throw new AppException(ErrorCode.FILE_CORRUPTED);
+        }
+
+        if (bytes.length > MAX_FILE_SIZE) {
+            double maxSizeMB = MAX_FILE_SIZE / (1024.0 * 1024.0);
+            double actualSizeMB = bytes.length / (1024.0 * 1024.0);
+            throw new AppException(ErrorCode.FILE_TOO_LARGE, maxSizeMB, actualSizeMB);
+        }
+
+        String ct = contentType != null ? contentType.toLowerCase() : null;
+        if (ct == null || !ALLOWED_CONTENT_TYPES.contains(ct)) {
+            throw new AppException(
+                    ErrorCode.INVALID_FILE_FORMAT,
+                    "JPG/JPEG/PNG",
+                    ct != null ? ct : "unknown"
+            );
+        }
+
+        try {
+            return doUpload(bytes, ct);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error while uploading raw bytes to Cloudinary: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, e.getMessage());
+        }
+    }
+
+    /**
+     * Logic upload chung lên Cloudinary cho cả MultipartFile và byte[].
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, String> doUpload(byte[] bytes, String contentType) throws Exception {
+        String uniqueFilename = UUID.randomUUID().toString() + "_" + System.currentTimeMillis();
+
+        Map<String, Object> uploadParams = ObjectUtils.asMap(
+                "folder", UPLOAD_FOLDER,
+                "public_id", uniqueFilename,
+                "resource_type", "image",
+                "overwrite", false,
+                "use_filename", false
+        );
+
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(bytes, uploadParams);
+
+        String url = (String) uploadResult.get("secure_url");
+        String publicId = (String) uploadResult.get("public_id");
+
+        log.info("File uploaded successfully to Cloudinary. ContentType: {}, PublicId: {}, URL: {}", contentType, publicId, url);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("url", url);
+        result.put("publicId", publicId);
+
+        return result;
     }
     
     @Override
