@@ -52,7 +52,7 @@ cloudinary:
 
 # Hugging Face Configuration (for Virtual Try-On)
 huggingface:
-  api-key: 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
+  api-key:
 
 open:
   api:
