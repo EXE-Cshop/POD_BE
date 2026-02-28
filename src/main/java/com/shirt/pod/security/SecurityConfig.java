@@ -61,10 +61,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/upload/**").permitAll()
+                        .requestMatchers("/api/v1/virtual-tryon/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers("/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/users/**").authenticated()
-                        .anyRequest().permitAll());//sửa để test
+                        // .requestMatchers("/api/v1/users/**").authenticated()
+                        .anyRequest().permitAll());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

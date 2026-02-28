@@ -1,14 +1,11 @@
 package com.shirt.pod.config;
 
-import com.shirt.pod.model.entity.Permission;
-import com.shirt.pod.model.entity.Role;
-import com.shirt.pod.model.entity.User;
+import com.shirt.pod.model.entity.*;
 import com.shirt.pod.model.entity.enums.PermissionName;
 import com.shirt.pod.model.entity.enums.RoleConstant;
 import com.shirt.pod.model.entity.enums.UserStatus;
-import com.shirt.pod.repository.PermissionRepository;
-import com.shirt.pod.repository.RoleRepository;
-import com.shirt.pod.repository.UserRepository;
+import com.shirt.pod.model.entity.enums.OrderStatus;
+import com.shirt.pod.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -16,8 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +25,12 @@ public class DataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BaseProductRepository baseProductRepository;
+    private final PrintAreaRepository printAreaRepository;
+    private final ProductVariantRepository productVariantRepository;
+    private final SavedDesignRepository savedDesignRepository;
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
 
     @Override
     @Transactional
@@ -50,7 +53,9 @@ public class DataSeeder implements CommandLineRunner {
                 userPermissions);
         log.info("Created/Updated USER role with {} permissions", userRole.getPermissions().size());
 
-        createDefaultAdminUser(superAdminRole);
+        User admin = createDefaultAdminUser(superAdminRole);
+
+        seedProductsAndFlows(admin);
 
         log.info("========== Data Seeder Completed ==========");
     }
@@ -104,24 +109,130 @@ public class DataSeeder implements CommandLineRunner {
         return basicPermissions;
     }
 
-    private void createDefaultAdminUser(Role superAdminRole) {
+    private User createDefaultAdminUser(Role superAdminRole) {
         String adminEmail = "admin";
+        User admin;
 
         if (!userRepository.existsByEmail(adminEmail)) {
-            User admin = User.builder()
+            admin = User.builder()
                     .email(adminEmail)
                     .password(passwordEncoder.encode("admin"))
                     .fullName("System Administrator")
                     .status(UserStatus.ACTIVE)
-                    .roles(Set.of(superAdminRole))
+                    .roles(new HashSet<>(Set.of(superAdminRole)))
                     .build();
 
-            userRepository.save(admin);
+            admin = userRepository.save(admin);
             log.info("Created default admin user: {}", adminEmail);
             log.warn("IMPORTANT: Default admin password is 'admin'");
         } else {
+            admin = userRepository.findByEmail(adminEmail).orElseThrow();
             log.info("Admin user already exists: {}", adminEmail);
         }
+        return admin;
+    }
+
+    private void seedProductsAndFlows(User admin) {
+        if (baseProductRepository.count() > 0) {
+            log.info("Products already seeded, skipping product flow seeding.");
+            return;
+        }
+
+        // 1. Seed Base Product
+        BaseProduct shirt = BaseProduct.builder()
+                .name("Áo Thun Premium")
+                .description("Áo thun cotton 100% chất lượng cao")
+                .basePrice(new BigDecimal("250000"))
+                .material("Cotton 100%")
+                .active(true)
+                .build();
+        shirt = baseProductRepository.save(shirt);
+
+        // 2. Seed Print Areas
+        PrintArea frontArea = PrintArea.builder()
+                .baseProduct(shirt)
+                .name(com.shirt.pod.model.entity.enums.PrintAreaName.FRONT_CENTER)
+                .widthMm(new BigDecimal("300.0"))
+                .heightMm(new BigDecimal("400.0"))
+                .topOffsetPercent(15.0)
+                .leftOffsetPercent(25.0)
+                .widthPercent(50.0)
+                .heightPercent(60.0)
+                .build();
+        printAreaRepository.save(frontArea);
+
+        // 3. Seed Variants
+        ProductVariant blackM = ProductVariant.builder()
+                .baseProduct(shirt)
+                .colorName("Đen")
+                .colorHex("#000000")
+                .size("M")
+                .sku("TSHIRT-BLACK-M")
+                .stockQuantity(100)
+                .frontImageUrl("https://res.cloudinary.com/di5j3h6wi/image/upload/v1/samples/tshirt-black-front")
+                .backImageUrl("https://res.cloudinary.com/di5j3h6wi/image/upload/v1/samples/tshirt-black-back")
+                .priceAdjustment(BigDecimal.ZERO)
+                .active(true)
+                .build();
+        blackM = productVariantRepository.save(blackM);
+
+        ProductVariant whiteL = ProductVariant.builder()
+                .baseProduct(shirt)
+                .colorName("Trắng")
+                .colorHex("#FFFFFF")
+                .size("L")
+                .sku("TSHIRT-WHITE-L")
+                .stockQuantity(50)
+                .frontImageUrl("https://res.cloudinary.com/di5j3h6wi/image/upload/v1/samples/tshirt-white-front")
+                .backImageUrl("https://res.cloudinary.com/di5j3h6wi/image/upload/v1/samples/tshirt-white-back")
+                .priceAdjustment(new BigDecimal("10000"))
+                .active(true)
+                .build();
+        productVariantRepository.save(whiteL);
+
+        // 4. Seed Saved Design
+        Map<String, Object> designData = new HashMap<>();
+        designData.put("elements", List.of(Map.of("type", "text", "content", "Hello World", "color", "#FF0000")));
+        SavedDesign design = SavedDesign.builder()
+                .name("Cool Design 01")
+                .designJsonData(designData)
+                .previewImageUrl("https://res.cloudinary.com/di5j3h6wi/image/upload/v1/samples/preview-design")
+                .isTemplate(false)
+                .build();
+        savedDesignRepository.save(design);
+
+        // 5. Seed Order
+        Order sampleOrder = Order.builder()
+                .status(OrderStatus.PENDING)
+                .totalAmount(new BigDecimal("260000"))
+                .shippingFee(new BigDecimal("30000"))
+                .recipientName("Nguyen Khach Hang")
+                .recipientPhone("0988888888")
+                .shippingAddress("123 Street, City")
+                .paymentMethod("COD")
+                .paymentStatus("UNPAID")
+                .userId(admin.getId())
+                .build();
+
+        sampleOrder = orderRepository.save(sampleOrder);
+
+        OrderItem item = OrderItem.builder()
+                .orderId(sampleOrder.getId())
+                .quantity(1)
+                .unitPrice(new BigDecimal("250000"))
+                .productionStatus("WAITING")
+                .build();
+
+        sampleOrder.setOrderItems(new ArrayList<>(List.of(item)));
+        orderRepository.save(sampleOrder);
+
+        // 6. Seed Cart
+        Cart cart = Cart.builder()
+                .user(admin)
+                .build();
+        cartRepository.save(cart);
+
+        log.info("Successfully seeded product flows (Product, Design, Order, Cart)");
     }
 
     private String generatePermissionDescription(String permissionName) {

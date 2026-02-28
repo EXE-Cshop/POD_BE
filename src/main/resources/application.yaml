@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pod_db
     username: postgres
-    password: admin
+    password: root
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -49,6 +49,10 @@ cloudinary:
   cloud-name: di5j3h6wi
   api-key: 227498933227112
   api-secret: 9arlZHQ4JV8y3eS6ZH18hca1Vqg
+
+# Hugging Face Configuration (for Virtual Try-On)
+huggingface:
+  api-key: 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
 
 open:
   api:

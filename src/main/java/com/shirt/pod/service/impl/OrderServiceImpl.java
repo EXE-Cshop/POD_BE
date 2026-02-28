@@ -4,7 +4,7 @@ import com.shirt.pod.exception.AppException;
 import com.shirt.pod.exception.ErrorCode;
 import com.shirt.pod.mapper.OrderItemMapper;
 import com.shirt.pod.mapper.OrderMapper;
-import com.shirt.pod.model.dto.request.RenderRequest;
+import com.shirt.pod.model.dto.request.RenderPrintRequest;
 import com.shirt.pod.model.dto.response.DashboardStatsDTO;
 import com.shirt.pod.model.dto.response.OrderDTO;
 import com.shirt.pod.model.dto.response.OrderDetailDTO;
