@@ -35,6 +35,9 @@ public class BaseProduct extends BaseEntity {
 
     private String printTechnology; // Công nghệ in mặc định: DTG, Decal, In chuyển nhiệt
 
+    @Column(name = "image_url")
+    private String imageUrl; // URL ảnh sản phẩm mặc định
+
     private Boolean active;
 
     @OneToMany(mappedBy = "baseProduct", cascade = CascadeType.ALL)

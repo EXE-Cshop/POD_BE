@@ -40,5 +40,8 @@ public class BaseProductUpdateRequest implements Serializable {
     @Size(max = 100, message = "Print technology must not exceed 100 characters")
     String printTechnology;
 
+    @Size(max = 1000, message = "Image URL must not exceed 1000 characters")
+    String imageUrl;
+
     Boolean active;
 }
