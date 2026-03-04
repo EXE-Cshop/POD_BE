@@ -116,6 +116,12 @@
             <artifactId>db-scheduler-spring-boot-starter</artifactId>
             <version>14.1.0</version>
         </dependency>
+        <!-- Apache Batik for SVG → BufferedImage (stickers) -->
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-transcoder</artifactId>
+            <version>1.18</version>
+        </dependency>
     </dependencies>
 
     <build>

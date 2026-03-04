@@ -12,11 +12,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+
 import javax.imageio.ImageIO;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -25,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -63,16 +69,21 @@ public class RenderEngineServiceImpl implements RenderEngineService {
                 throw new AppException(ErrorCode.INVALID_INPUT, "width_mm/height_mm");
             }
 
-            int canvasWidth = UnitConverter.mmToPixels(widthMm, dpi);
-            int canvasHeight = UnitConverter.mmToPixels(heightMm, dpi);
-            log.debug("Canvas size (px): width={}, height={}", canvasWidth, canvasHeight);
+            int designWidthPx = UnitConverter.mmToPixels(widthMm, dpi);
+            int designHeightPx = UnitConverter.mmToPixels(heightMm, dpi);
+            log.debug("Design buffer size (px): {}x{}", designWidthPx, designHeightPx);
 
-            BufferedImage canvas = createTransparentCanvas(canvasWidth, canvasHeight);
-            Graphics2D g2d = setupGraphics2D(canvas);
+            BufferedImage designBuffer = createTransparentCanvas(designWidthPx, designHeightPx);
+            Graphics2D g2dDesign = setupGraphics2D(designBuffer);
+            renderPrintLayersMm(g2dDesign, request.getLayers(), dpi, tempFiles);
+            g2dDesign.dispose();
 
-            renderPrintLayersMm(g2d, request.getLayers(), dpi, tempFiles);
-
-            g2d.dispose();
+            BufferedImage canvas;
+            if (request.getGarmentImageUrl() != null && !request.getGarmentImageUrl().isBlank()) {
+                canvas = compositeGarmentWithDesign(request, designBuffer, designWidthPx, designHeightPx, tempFiles);
+            } else {
+                canvas = designBuffer;
+            }
 
             // Ghi canvas ra byte[] (PNG)
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -101,8 +112,8 @@ public class RenderEngineServiceImpl implements RenderEngineService {
                     .status("SUCCESS")
                     .fileUrl(fileUrl)
                     .fileSize(fileSize)
-                    .widthPx(canvasWidth)
-                    .heightPx(canvasHeight)
+                    .widthPx(canvas.getWidth())
+                    .heightPx(canvas.getHeight())
                     .dpi(dpi)
                     .renderTimeMs(System.currentTimeMillis() - startTime)
                     .renderedAt(Instant.now())
@@ -116,6 +127,54 @@ public class RenderEngineServiceImpl implements RenderEngineService {
         } finally {
             log.debug("Cleaning up {} temp files after render", tempFiles.size());
             cleanupTempFiles(tempFiles);
+        }
+    }
+
+    /** Composite garment image + design buffer = full mockup. */
+    private BufferedImage compositeGarmentWithDesign(RenderPrintRequest request, BufferedImage designBuffer,
+                                                     int designW, int designH, List<File> tempFiles) {
+        BufferedImage garment = loadImageFromUrl(request.getGarmentImageUrl(), tempFiles);
+        int gw = garment.getWidth();
+        int gh = garment.getHeight();
+
+        double leftR = request.getPrintAreaLeftRatio() != null ? request.getPrintAreaLeftRatio() : 0.25;
+        double topR = request.getPrintAreaTopRatio() != null ? request.getPrintAreaTopRatio() : 0.125;
+        double widthR = request.getPrintAreaWidthRatio() != null ? request.getPrintAreaWidthRatio() : 0.5;
+        double heightR = request.getPrintAreaHeightRatio() != null ? request.getPrintAreaHeightRatio() : 0.75;
+
+        int paLeft = (int) (leftR * gw);
+        int paTop = (int) (topR * gh);
+        int paW = (int) (widthR * gw);
+        int paH = (int) (heightR * gh);
+
+        BufferedImage result = new BufferedImage(gw, gh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = setupGraphics2D(result);
+        g.drawImage(garment, 0, 0, null);
+        g.drawImage(designBuffer, paLeft, paTop, paW, paH, null);
+        g.dispose();
+        return result;
+    }
+
+    private BufferedImage loadImageFromUrl(String url, List<File> tempFiles) {
+        try {
+            if (url.startsWith("data:")) {
+                byte[] bytes = parseDataUrlToBytes(url);
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+                    return ImageIO.read(bais);
+                }
+            }
+            File tmp = File.createTempFile("garment_", ".img");
+            try (InputStream in = URI.create(url).toURL().openStream()) {
+                Files.copy(in, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            tempFiles.add(tmp);
+            BufferedImage img = ImageIO.read(tmp);
+            if (img == null) throw new AppException(ErrorCode.IMAGE_READ_FAILED, url);
+            return img;
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.IMAGE_READ_FAILED, url);
         }
     }
 
@@ -174,38 +233,55 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.INVALID_INPUT, "url");
         }
         try {
-            File imageFile = File.createTempFile("layer_", ".img");
-            URI uri = URI.create(layer.getUrl());
-            try (InputStream in = uri.toURL().openStream()) {
-                Files.copy(in, imageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            File imageFile;
+            boolean isSvg = layer.getUrl().toLowerCase().contains("svg");
+            if (layer.getUrl().startsWith("data:")) {
+                // Data URL - backend doesn't need to fetch; avoids localhost/CORS issues
+                byte[] bytes = parseDataUrlToBytes(layer.getUrl());
+                String ext = isSvg ? ".svg" : ".img";
+                imageFile = File.createTempFile("layer_", ext);
+                Files.write(imageFile.toPath(), bytes);
+            } else {
+                imageFile = File.createTempFile("layer_", isSvg ? ".svg" : ".img");
+                URI uri = URI.create(layer.getUrl());
+                try (InputStream in = uri.toURL().openStream()) {
+                    Files.copy(in, imageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
             }
             tempFiles.add(imageFile);
 
+            int wPx = UnitConverter.mmToPixels(layer.getWidthMm(), dpi);
+            int hPx = UnitConverter.mmToPixels(layer.getHeightMm(), dpi);
+
             BufferedImage image = ImageIO.read(imageFile);
             if (image == null) {
-                throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
+                // ImageIO cannot read SVG; use Batik to rasterize
+                String url = layer.getUrl().toLowerCase();
+                boolean isSvg1 = url.endsWith(".svg") || url.contains("image/svg+xml");
+                if (isSvg1) {
+                    image = rasterizeSvgToBufferedImage(imageFile, wPx, hPx);
+                }
+                if (image == null) {
+                    throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
+                }
             }
 
             int xPx = UnitConverter.mmToPixels(layer.getXMm(), dpi);
             int yPx = UnitConverter.mmToPixels(layer.getYMm(), dpi);
-            int wPx = UnitConverter.mmToPixels(layer.getWidthMm(), dpi);
-            int hPx = UnitConverter.mmToPixels(layer.getHeightMm(), dpi);
+            double rotationRad = layer.getRotationDeg() != null ? UnitConverter.degreeToRadian(layer.getRotationDeg()) : 0;
             log.debug("Image layer: url={}, x_px={}, y_px={}, w_px={}, h_px={}, rotation_deg={}, opacity={}",
                     layer.getUrl(), xPx, yPx, wPx, hPx, layer.getRotationDeg(), layer.getOpacity());
 
-            AffineTransform tx = new AffineTransform();
-            tx.translate(xPx, yPx);
-
             double sx = (double) wPx / image.getWidth();
             double sy = (double) hPx / image.getHeight();
-            tx.scale(sx, sy);
+            double cx = xPx + wPx / 2.0;
+            double cy = yPx + hPx / 2.0;
 
-            if (layer.getRotationDeg() != null) {
-                tx.rotate(
-                        UnitConverter.degreeToRadian(layer.getRotationDeg()),
-                        wPx / 2.0,
-                        hPx / 2.0);
-            }
+            AffineTransform tx = new AffineTransform();
+            tx.translate(cx, cy);
+            tx.rotate(rotationRad);
+            tx.translate(-wPx / 2.0, -hPx / 2.0);
+            tx.scale(sx, sy);
 
             Composite old = g2d.getComposite();
             if (layer.getOpacity() != null) {
@@ -220,6 +296,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
+            log.error("Render image layer failed for url={}: {}", layer.getUrl(), e.getMessage(), e);
             throw new AppException(ErrorCode.IMAGE_RENDER_FAILED, layer.getUrl());
         }
     }
@@ -232,12 +309,20 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
         int xPx = UnitConverter.mmToPixels(layer.getXMm(), dpi);
         int yPx = UnitConverter.mmToPixels(layer.getYMm(), dpi);
+        double rotationRad = layer.getRotationDeg() != null ? UnitConverter.degreeToRadian(layer.getRotationDeg()) : 0;
+
+        AffineTransform oldTx = null;
+        if (Math.abs(rotationRad) > 1e-6) {
+            oldTx = g2d.getTransform();
+            g2d.translate(xPx, yPx);
+            g2d.rotate(rotationRad);
+            g2d.translate(-xPx, -yPx);
+        }
 
         g2d.setFont(new Font(
                 layer.getFontFamily() == null ? "Arial" : layer.getFontFamily(),
                 Font.PLAIN,
                 layer.getFontSize() == null ? 24 : layer.getFontSize()));
-
         int[] rgb = UnitConverter.parseHexColor(
                 layer.getFontColor() == null ? "#000000" : layer.getFontColor());
         g2d.setColor(new Color(rgb[0], rgb[1], rgb[2]));
@@ -246,8 +331,43 @@ public class RenderEngineServiceImpl implements RenderEngineService {
                 layer.getText().length() > 30 ? layer.getText().substring(0, 30) + "..." : layer.getText(),
                 xPx, yPx, layer.getFontFamily(), layer.getFontSize(), layer.getFontColor());
         g2d.drawString(layer.getText(), xPx, yPx);
+
+        if (oldTx != null) {
+            g2d.setTransform(oldTx);
+        }
     }
 
+
+    /** Parse data:image/...;base64,XXX URL to raw bytes. */
+    private byte[] parseDataUrlToBytes(String dataUrl) {
+        int comma = dataUrl.indexOf(',');
+        if (comma < 0 || !dataUrl.toLowerCase().contains("base64")) {
+            throw new AppException(ErrorCode.INVALID_INPUT, "Invalid data URL");
+        }
+        return Base64.getDecoder().decode(dataUrl.substring(comma + 1));
+    }
+
+    /**
+     * Rasterize SVG file to BufferedImage using Apache Batik (ImageIO cannot read SVG).
+     */
+    private BufferedImage rasterizeSvgToBufferedImage(File svgFile, int widthPx, int heightPx) {
+        try {
+            PNGTranscoder t = new PNGTranscoder();
+            t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) Math.max(1, widthPx));
+            t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) Math.max(1, heightPx));
+            try (InputStream in = Files.newInputStream(svgFile.toPath());
+                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                TranscoderInput input = new TranscoderInput(in);
+                TranscoderOutput output = new TranscoderOutput(out);
+                t.transcode(input, output);
+                out.flush();
+                return ImageIO.read(new ByteArrayInputStream(out.toByteArray()));
+            }
+        } catch (Exception e) {
+            log.warn("SVG rasterize failed for {}: {}", svgFile, e.getMessage());
+            return null;
+        }
+    }
 
     private void cleanupTempFiles(List<File> files) {
         for (File f : files) {
