@@ -50,12 +50,24 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                                 ? null
                                 : filterRequest.getSku();
 
-                // Build pageable
+                // Build pageable - convert camelCase to snake_case for native query
+                String sortColumn = filterRequest.getSortBy();
+                // Map common camelCase field names to snake_case column names
+                sortColumn = switch (sortColumn) {
+                        case "createdDate" -> "created_date";
+                        case "colorName" -> "color_name";
+                        case "stockQuantity" -> "stock_quantity";
+                        case "priceAdjustment" -> "price_adjustment";
+                        case "baseProductId" -> "base_product_id";
+                        case "frontImageUrl" -> "front_image_url";
+                        case "backImageUrl" -> "back_image_url";
+                        default -> sortColumn;
+                };
                 Sort.Direction direction = Sort.Direction.fromString(filterRequest.getOrder().toUpperCase());
                 Pageable pageable = PageRequest.of(
                                 filterRequest.getPage() > 0 ? filterRequest.getPage() - 1 : 0,
                                 filterRequest.getPageSize(),
-                                Sort.by(direction, filterRequest.getSortBy()));
+                                Sort.by(direction, sortColumn));
 
                 // Use native query with filters
                 Page<ProductVariant> variantPage = productVariantRepository.searchWithFilters(

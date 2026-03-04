@@ -54,6 +54,11 @@ cloudinary:
 huggingface:
   api-key: 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
 
+# Gemini AI Configuration (for AI Chatbot)
+gemini:
+  api-key: AIzaSyAdEKAi_S_5EdnPpjTlsl6GtO4UeG4sYC0
+  model: gemini-2.5-flash
+
 open:
   api:
     title: "C-Shop API"
@@ -66,3 +71,4 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
+
