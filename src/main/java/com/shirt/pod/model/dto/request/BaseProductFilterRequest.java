@@ -30,7 +30,7 @@ public class BaseProductFilterRequest {
     Integer size = 10;
 
     @Builder.Default
-    String sortBy = "createdDate";
+    String sortBy = "created_date";
 
     @Builder.Default
     String order = "DESC";
