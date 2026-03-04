@@ -105,7 +105,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CartDTO getCurrentCart(Long userId) {
         Cart cart = getOrCreateCart(userId);
         return mapToCartDTO(cart);
