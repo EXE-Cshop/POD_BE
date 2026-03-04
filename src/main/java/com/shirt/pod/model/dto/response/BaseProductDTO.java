@@ -25,6 +25,7 @@ public class BaseProductDTO {
     BigDecimal basePrice;
     String material;
     String printTechnology;
+    String imageUrl;
     Boolean active;
     Instant createdDate;
     Instant modifiedDate;

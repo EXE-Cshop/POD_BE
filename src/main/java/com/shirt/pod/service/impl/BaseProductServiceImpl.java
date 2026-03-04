@@ -24,109 +24,135 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class BaseProductServiceImpl implements BaseProductService {
 
-    private final BaseProductRepository baseProductRepository;
-    private final BaseProductMapper baseProductMapper;
+        private final BaseProductRepository baseProductRepository;
+        private final BaseProductMapper baseProductMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BaseProductDTO> getAll(BaseProductFilterRequest filterRequest) {
-        log.info("Fetching base products with filters - name: {}, material: {}, printTechnology: {}, active: {}",
-                filterRequest.getName(), filterRequest.getMaterial(),
-                filterRequest.getPrintTechnology(), filterRequest.getActive());
+        @Override
+        @Transactional(readOnly = true)
+        public Page<BaseProductDTO> getAll(BaseProductFilterRequest filterRequest) {
+                log.info("Fetching base products with filters - name: {}, material: {}, printTechnology: {}, active: {}",
+                                filterRequest.getName(), filterRequest.getMaterial(),
+                                filterRequest.getPrintTechnology(), filterRequest.getActive());
 
-        // Convert empty strings to null for proper SQL handling
-        String nameFilter = (filterRequest.getName() != null && filterRequest.getName().trim().isEmpty())
-                ? null
-                : filterRequest.getName();
-        String materialFilter = (filterRequest.getMaterial() != null && filterRequest.getMaterial().trim().isEmpty())
-                ? null
-                : filterRequest.getMaterial();
-        String printTechFilter = (filterRequest.getPrintTechnology() != null
-                && filterRequest.getPrintTechnology().trim().isEmpty())
-                        ? null
-                        : filterRequest.getPrintTechnology();
+                // Convert empty strings to null for proper SQL handling
+                String nameFilter = (filterRequest.getName() != null && filterRequest.getName().trim().isEmpty())
+                                ? null
+                                : filterRequest.getName();
+                String materialFilter = (filterRequest.getMaterial() != null
+                                && filterRequest.getMaterial().trim().isEmpty())
+                                                ? null
+                                                : filterRequest.getMaterial();
+                String printTechFilter = (filterRequest.getPrintTechnology() != null
+                                && filterRequest.getPrintTechnology().trim().isEmpty())
+                                                ? null
+                                                : filterRequest.getPrintTechnology();
 
-        // Build pageable
-        Sort.Direction direction = Sort.Direction.fromString(filterRequest.getOrder().toUpperCase());
-        Pageable pageable = PageRequest.of(
-                filterRequest.getPage() > 0 ? filterRequest.getPage() - 1 : 0,
-                filterRequest.getSize(),
-                Sort.by(direction, filterRequest.getSortBy()));
+                // Build pageable - convert Java field names to DB column names for native query
+                Sort.Direction direction = Sort.Direction.fromString(filterRequest.getOrder().toUpperCase());
+                String sortColumn = convertToColumnName(filterRequest.getSortBy());
+                Pageable pageable = PageRequest.of(
+                                filterRequest.getPage() > 0 ? filterRequest.getPage() - 1 : 0,
+                                filterRequest.getSize(),
+                                Sort.by(direction, sortColumn));
 
-        // Use native query with filters
-        Page<BaseProduct> productPage = baseProductRepository.searchWithFilters(
-                nameFilter, materialFilter, printTechFilter, filterRequest.getActive(), pageable);
+                // Use native query with filters
+                Page<BaseProduct> productPage = baseProductRepository.searchWithFilters(
+                                nameFilter, materialFilter, printTechFilter, filterRequest.getActive(), pageable);
 
-        log.info("Found {} base products (page {}/{}, size {})",
-                productPage.getTotalElements(),
-                productPage.getNumber() + 1,
-                productPage.getTotalPages(),
-                productPage.getSize());
+                log.info("Found {} base products (page {}/{}, size {})",
+                                productPage.getTotalElements(),
+                                productPage.getNumber() + 1,
+                                productPage.getTotalPages(),
+                                productPage.getSize());
 
-        return productPage.map(baseProductMapper::toDTO);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BaseProductDTO getById(Long id) {
-        log.info("Fetching base product with id: {}", id);
-        BaseProduct product = baseProductRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Base product not found with id: " + id));
-        return baseProductMapper.toDTO(product);
-    }
-
-    @Override
-    @Transactional
-    public BaseProductDTO create(BaseProductCreateRequest request) {
-        log.info("Creating new base product with name: {}", request.getName());
-
-        // Validate unique name
-        if (baseProductRepository.existsByName(request.getName())) {
-            throw new ValidationException("Base product with name '" + request.getName() + "' already exists");
+                return productPage.map(baseProductMapper::toDTO);
         }
 
-        BaseProduct product = baseProductMapper.toEntity(request);
-        BaseProduct savedProduct = baseProductRepository.save(product);
-
-        log.info("Created base product with id: {}", savedProduct.getId());
-        return baseProductMapper.toDTO(savedProduct);
-    }
-
-    @Override
-    @Transactional
-    public BaseProductDTO update(Long id, BaseProductUpdateRequest request) {
-        log.info("Updating base product with id: {}", id);
-
-        BaseProduct product = baseProductRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Base product not found with id: " + id));
-
-        // Validate unique name if name is being updated
-        if (request.getName() != null && !request.getName().equals(product.getName())) {
-            if (baseProductRepository.existsByNameAndIdNot(request.getName(), id)) {
-                throw new ValidationException("Base product with name '" + request.getName() + "' already exists");
-            }
+        @Override
+        @Transactional(readOnly = true)
+        public BaseProductDTO getById(Long id) {
+                log.info("Fetching base product with id: {}", id);
+                BaseProduct product = baseProductRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Base product not found with id: " + id));
+                return baseProductMapper.toDTO(product);
         }
 
-        // Update only non-null fields
-        baseProductMapper.updateEntity(request, product);
-        BaseProduct updatedProduct = baseProductRepository.save(product);
+        @Override
+        @Transactional
+        public BaseProductDTO create(BaseProductCreateRequest request) {
+                log.info("Creating new base product with name: {}", request.getName());
 
-        log.info("Updated base product with id: {}", id);
-        return baseProductMapper.toDTO(updatedProduct);
-    }
+                // Validate unique name
+                if (baseProductRepository.existsByName(request.getName())) {
+                        throw new ValidationException(
+                                        "Base product with name '" + request.getName() + "' already exists");
+                }
 
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        log.info("Deleting base product with id: {}", id);
+                BaseProduct product = baseProductMapper.toEntity(request);
+                BaseProduct savedProduct = baseProductRepository.save(product);
 
-        BaseProduct product = baseProductRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Base product not found with id: " + id));
+                log.info("Created base product with id: {}", savedProduct.getId());
+                return baseProductMapper.toDTO(savedProduct);
+        }
 
-        // Soft delete
-        product.setActive(false);
-        baseProductRepository.save(product);
+        @Override
+        @Transactional
+        public BaseProductDTO update(Long id, BaseProductUpdateRequest request) {
+                log.info("Updating base product with id: {}", id);
 
-        log.info("Deleted (soft) base product with id: {}", id);
-    }
+                BaseProduct product = baseProductRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Base product not found with id: " + id));
+
+                // Validate unique name if name is being updated
+                if (request.getName() != null && !request.getName().equals(product.getName())) {
+                        if (baseProductRepository.existsByNameAndIdNot(request.getName(), id)) {
+                                throw new ValidationException(
+                                                "Base product with name '" + request.getName() + "' already exists");
+                        }
+                }
+
+                // Update only non-null fields
+                baseProductMapper.updateEntity(request, product);
+                BaseProduct updatedProduct = baseProductRepository.save(product);
+
+                log.info("Updated base product with id: {}", id);
+                return baseProductMapper.toDTO(updatedProduct);
+        }
+
+        @Override
+        @Transactional
+        public void delete(Long id) {
+                log.info("Deleting base product with id: {}", id);
+
+                BaseProduct product = baseProductRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Base product not found with id: " + id));
+
+                // Soft delete
+                product.setActive(false);
+                baseProductRepository.save(product);
+
+                log.info("Deleted (soft) base product with id: {}", id);
+        }
+
+        /**
+         * Convert Java camelCase field name to snake_case DB column name
+         * Required because native SQL queries need actual column names
+         */
+        private String convertToColumnName(String fieldName) {
+                if (fieldName == null)
+                        return "created_date";
+                return switch (fieldName) {
+                        case "createdDate" -> "created_date";
+                        case "modifiedDate" -> "modified_date";
+                        case "basePrice" -> "base_price";
+                        case "printTechnology" -> "print_technology";
+                        case "imageUrl" -> "image_url";
+                        case "createdBy" -> "created_by";
+                        case "modifiedBy" -> "modified_by";
+                        default -> fieldName; // name, material, active are same in DB
+                };
+        }
 }
