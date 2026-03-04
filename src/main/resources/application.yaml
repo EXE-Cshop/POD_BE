@@ -52,7 +52,12 @@ cloudinary:
 
 # Hugging Face Configuration (for Virtual Try-On)
 huggingface:
-  api-key: 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
+  api-key: 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
+
+# Gemini AI Configuration (for AI Chatbot)
+gemini:
+  api-key: AIzaSyAdEKAi_S_5EdnPpjTlsl6GtO4UeG4sYC0
+  model: gemini-2.5-flash
 
 open:
   api:
@@ -67,7 +72,3 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
 
-# Gemini AI Configuration (for ChatBot)
-gemini:
-  api-key: AIzaSyAdEKAi_S_5EdnPpjTlsl6GtO4UeG4sYC0
-  model: gemini-2.5-flash
