@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -21,7 +23,8 @@ public class UploadServiceImpl implements UploadService {
     private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList(
             "image/jpeg",
             "image/jpg",
-            "image/png"
+            "image/png",
+            "image/webp"
     );
     private static final String UPLOAD_FOLDER = "tshirt-pod/uploads";
     
@@ -144,5 +147,36 @@ public class UploadServiceImpl implements UploadService {
             log.error("Error while deleting image from Cloudinary: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.STORAGE_SERVICE_ERROR, e.getMessage());
         }
+    }
+
+    @Override
+    public boolean deleteImageByUrl(String cloudinaryUrl) {
+        if (cloudinaryUrl == null || cloudinaryUrl.isBlank() || !cloudinaryUrl.contains("cloudinary.com")) {
+            return false;
+        }
+        String publicId = extractPublicIdFromUrl(cloudinaryUrl);
+        if (publicId == null || publicId.isBlank()) {
+            log.warn("Could not extract publicId from Cloudinary URL: {}", cloudinaryUrl.length() > 100 ? cloudinaryUrl.substring(0, 100) + "..." : cloudinaryUrl);
+            return false;
+        }
+        try {
+            return deleteImage(publicId);
+        } catch (Exception e) {
+            log.warn("Failed to delete image by URL (publicId={}): {}", publicId, e.getMessage());
+            return false;
+        }
+    }
+
+    private static final Pattern PUBLIC_ID_PATTERN = Pattern.compile("/upload/(?:[^/]+/)*v\\d+/(.+?)(?:\\.[^.]+)?$");
+
+    /**
+     * Trích public_id từ Cloudinary URL.
+     * Ví dụ: https://res.cloudinary.com/xxx/image/upload/v123/folder/file.png -> folder/file
+     */
+    private String extractPublicIdFromUrl(String url) {
+        Matcher m = PUBLIC_ID_PATTERN.matcher(url);
+        if (!m.find()) return null;
+        String publicId = m.group(1);
+        return publicId == null || publicId.isBlank() ? null : publicId;
     }
 }

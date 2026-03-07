@@ -12,10 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.PNGTranscoder;
-
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -95,7 +91,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
             // Ưu tiên upload qua UploadService (Cloudinary), nếu fail thì fallback lưu local
             try {
-                log.debug("Uploading rendered image via UploadService (bytes), size={} bytes", bytes.length);
+                log.info("Uploading rendered preview to Cloudinary, size={} bytes", bytes.length);
                 var uploadResult = uploadService.uploadImageBytes(bytes, "render.png", "image/png");
                 fileUrl = uploadResult.get("url");
                 fileSize = bytes.length;
@@ -233,17 +229,15 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.INVALID_INPUT, "url");
         }
         try {
+            String fetchUrl = toPngIfCloudinaryWebp(layer.getUrl());
             File imageFile;
-            boolean isSvg = layer.getUrl().toLowerCase().contains("svg");
-            if (layer.getUrl().startsWith("data:")) {
-                // Data URL - backend doesn't need to fetch; avoids localhost/CORS issues
-                byte[] bytes = parseDataUrlToBytes(layer.getUrl());
-                String ext = isSvg ? ".svg" : ".img";
-                imageFile = File.createTempFile("layer_", ext);
+            if (fetchUrl.startsWith("data:")) {
+                byte[] bytes = parseDataUrlToBytes(fetchUrl);
+                imageFile = File.createTempFile("layer_", ".png");
                 Files.write(imageFile.toPath(), bytes);
             } else {
-                imageFile = File.createTempFile("layer_", isSvg ? ".svg" : ".img");
-                URI uri = URI.create(layer.getUrl());
+                imageFile = File.createTempFile("layer_", ".png");
+                URI uri = URI.create(fetchUrl);
                 try (InputStream in = uri.toURL().openStream()) {
                     Files.copy(in, imageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -255,15 +249,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
             BufferedImage image = ImageIO.read(imageFile);
             if (image == null) {
-                // ImageIO cannot read SVG; use Batik to rasterize
-                String url = layer.getUrl().toLowerCase();
-                boolean isSvg1 = url.endsWith(".svg") || url.contains("image/svg+xml");
-                if (isSvg1) {
-                    image = rasterizeSvgToBufferedImage(imageFile, wPx, hPx);
-                }
-                if (image == null) {
-                    throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
-                }
+                throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
             }
 
             int xPx = UnitConverter.mmToPixels(layer.getXMm(), dpi);
@@ -319,24 +305,48 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             g2d.translate(-xPx, -yPx);
         }
 
-        g2d.setFont(new Font(
+        Font font = new Font(
                 layer.getFontFamily() == null ? "Arial" : layer.getFontFamily(),
                 Font.PLAIN,
-                layer.getFontSize() == null ? 24 : layer.getFontSize()));
+                layer.getFontSize() == null ? 24 : layer.getFontSize());
+        g2d.setFont(font);
         int[] rgb = UnitConverter.parseHexColor(
                 layer.getFontColor() == null ? "#000000" : layer.getFontColor());
         g2d.setColor(new Color(rgb[0], rgb[1], rgb[2]));
 
+        // Java drawString(x,y) uses y as BASELINE; our yPx is TOP of text box -> add ascent
+        int ascent = g2d.getFontMetrics(font).getAscent();
+        int drawY = yPx + ascent;
+
         log.debug("Text layer: text_sample=\"{}\", x_px={}, y_px={}, font_family={}, font_size={}, color={}",
                 layer.getText().length() > 30 ? layer.getText().substring(0, 30) + "..." : layer.getText(),
                 xPx, yPx, layer.getFontFamily(), layer.getFontSize(), layer.getFontColor());
-        g2d.drawString(layer.getText(), xPx, yPx);
+        g2d.drawString(layer.getText(), xPx, drawY);
 
         if (oldTx != null) {
             g2d.setTransform(oldTx);
         }
     }
 
+
+    /**
+     * Java ImageIO không đọc được WebP. Với URL Cloudinary .webp, chèn f_png để lấy PNG.
+     */
+    private String toPngIfCloudinaryWebp(String url) {
+        if (url == null || !url.contains("cloudinary.com")) return url;
+        String lower = url.toLowerCase();
+        if (lower.contains(".webp") || lower.contains("webp")) {
+            String marker = "/image/upload/";
+            int i = url.indexOf(marker);
+            if (i >= 0) {
+                int insertAt = i + marker.length();
+                if (!url.substring(insertAt, Math.min(insertAt + 6, url.length())).startsWith("f_")) {
+                    return url.substring(0, insertAt) + "f_png/" + url.substring(insertAt);
+                }
+            }
+        }
+        return url;
+    }
 
     /** Parse data:image/...;base64,XXX URL to raw bytes. */
     private byte[] parseDataUrlToBytes(String dataUrl) {
@@ -345,28 +355,6 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.INVALID_INPUT, "Invalid data URL");
         }
         return Base64.getDecoder().decode(dataUrl.substring(comma + 1));
-    }
-
-    /**
-     * Rasterize SVG file to BufferedImage using Apache Batik (ImageIO cannot read SVG).
-     */
-    private BufferedImage rasterizeSvgToBufferedImage(File svgFile, int widthPx, int heightPx) {
-        try {
-            PNGTranscoder t = new PNGTranscoder();
-            t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) Math.max(1, widthPx));
-            t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) Math.max(1, heightPx));
-            try (InputStream in = Files.newInputStream(svgFile.toPath());
-                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                TranscoderInput input = new TranscoderInput(in);
-                TranscoderOutput output = new TranscoderOutput(out);
-                t.transcode(input, output);
-                out.flush();
-                return ImageIO.read(new ByteArrayInputStream(out.toByteArray()));
-            }
-        } catch (Exception e) {
-            log.warn("SVG rasterize failed for {}: {}", svgFile, e.getMessage());
-            return null;
-        }
     }
 
     private void cleanupTempFiles(List<File> files) {
