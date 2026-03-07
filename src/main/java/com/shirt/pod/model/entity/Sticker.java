@@ -20,4 +20,7 @@ public class Sticker extends BaseEntityCreatedOnly {
 
     @Column(name = "link", nullable = false, length = 2048)
     private String link;
+
+    @Column(name = "label", length = 255)
+    private String label;
 }

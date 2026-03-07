@@ -19,4 +19,7 @@ public class StickerUpdateRequest {
 
     @Size(max = 2048)
     String link;
+
+    @Size(max = 255)
+    String label;
 }

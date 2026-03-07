@@ -27,6 +27,7 @@ public class UploadServiceImpl implements UploadService {
             "image/webp"
     );
     private static final String UPLOAD_FOLDER = "tshirt-pod/uploads";
+    private static final String STICKER_FOLDER = "tshirt-pod/stickers";
     
     private final Cloudinary cloudinary;
     
@@ -52,12 +53,40 @@ public class UploadServiceImpl implements UploadService {
         }
         
         try {
-            return doUpload(file.getBytes(), file.getContentType());
+            return doUpload(file.getBytes(), file.getContentType(), UPLOAD_FOLDER);
             
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
             log.error("Error while uploading file to Cloudinary: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    public Map<String, String> uploadSticker(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_CORRUPTED);
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            double maxSizeMB = MAX_FILE_SIZE / (1024.0 * 1024.0);
+            double actualSizeMB = file.getSize() / (1024.0 * 1024.0);
+            throw new AppException(ErrorCode.FILE_TOO_LARGE, maxSizeMB, actualSizeMB);
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new AppException(
+                    ErrorCode.INVALID_FILE_FORMAT,
+                    "JPG/JPEG/PNG/WebP",
+                    contentType != null ? contentType : "unknown"
+            );
+        }
+        try {
+            return doUpload(file.getBytes(), file.getContentType(), STICKER_FOLDER);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error uploading sticker to Cloudinary: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FILE_UPLOAD_FAILED, e.getMessage());
         }
     }
@@ -84,7 +113,7 @@ public class UploadServiceImpl implements UploadService {
         }
 
         try {
-            return doUpload(bytes, ct);
+            return doUpload(bytes, ct, UPLOAD_FOLDER);
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
@@ -97,11 +126,11 @@ public class UploadServiceImpl implements UploadService {
      * Logic upload chung lên Cloudinary cho cả MultipartFile và byte[].
      */
     @SuppressWarnings("unchecked")
-    private Map<String, String> doUpload(byte[] bytes, String contentType) throws Exception {
+    private Map<String, String> doUpload(byte[] bytes, String contentType, String folder) throws Exception {
         String uniqueFilename = UUID.randomUUID().toString() + "_" + System.currentTimeMillis();
 
         Map<String, Object> uploadParams = ObjectUtils.asMap(
-                "folder", UPLOAD_FOLDER,
+                "folder", folder,
                 "public_id", uniqueFilename,
                 "resource_type", "image",
                 "overwrite", false,

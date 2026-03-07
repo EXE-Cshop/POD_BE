@@ -20,5 +20,6 @@ public class StickerDTO {
 
     Long id;
     String link;
+    String label;
     Instant createdDate;
 }

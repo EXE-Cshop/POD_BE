@@ -7,6 +7,9 @@ import java.util.Map;
 public interface UploadService {
     Map<String, String> uploadImage(MultipartFile file);
 
+    /** Upload ảnh sticker lên Cloudinary (folder tshirt-pod/stickers) */
+    Map<String, String> uploadSticker(MultipartFile file);
+
     /**
      * Upload image từ byte[] (file được generate trong backend).
      *

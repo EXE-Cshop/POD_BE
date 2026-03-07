@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -42,7 +44,17 @@ public class StickerController {
                 .build();
     }
 
-    @Operation(summary = "Create new sticker")
+    @Operation(summary = "Upload sticker image")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<StickerDTO> upload(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.<StickerDTO>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Sticker uploaded successfully")
+                .data(stickerService.upload(file))
+                .build();
+    }
+
+    @Operation(summary = "Create new sticker (by link - deprecated, prefer upload)")
     @PostMapping
     public ApiResponse<StickerDTO> create(@Valid @RequestBody StickerCreateRequest request) {
         return ApiResponse.<StickerDTO>builder()
