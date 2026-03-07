@@ -28,12 +28,10 @@ public class PrintDesignLayerRequest {
 
     @NotNull(message = "X (mm) is required")
     @JsonProperty("x_mm")
-    @PositiveOrZero(message = "X (mm) must be >= 0")
     private BigDecimal xMm;
 
     @NotNull(message = "Y (mm) is required")
     @JsonProperty("y_mm")
-    @PositiveOrZero(message = "Y (mm) must be >= 0")
     private BigDecimal yMm;
 
     @NotNull(message = "Width (mm) is required")
