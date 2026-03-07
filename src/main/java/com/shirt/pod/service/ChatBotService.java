@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.shirt.pod.model.dto.ChatMessage;
 import com.shirt.pod.model.dto.ChatRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,14 +89,14 @@ public class ChatBotService {
     /**
      * Chat with text only
      */
-    public String chat(String userMessage, List<ChatRequest.ChatMessage> history) {
+    public String chat(String userMessage, List<ChatMessage> history) {
         return chat(userMessage, history, null);
     }
 
     /**
      * Chat with text + optional image (for design review)
      */
-    public String chat(String userMessage, List<ChatRequest.ChatMessage> history, String imageBase64) {
+    public String chat(String userMessage, List<ChatMessage> history, String imageBase64) {
         try {
             String url = String.format(
                     "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
@@ -117,7 +118,7 @@ public class ChatBotService {
             if (history != null) {
                 int start = Math.max(0, history.size() - 10);
                 for (int i = start; i < history.size(); i++) {
-                    ChatRequest.ChatMessage msg = history.get(i);
+                    ChatMessage msg = history.get(i);
                     ObjectNode content = mapper.createObjectNode();
                     content.put("role", "assistant".equals(msg.getRole()) ? "model" : "user");
                     ArrayNode parts = mapper.createArrayNode();
@@ -174,9 +175,10 @@ public class ChatBotService {
             // Send request
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> request = new HttpEntity<>(mapper.writeValueAsString(root), headers);
+            String jsonPayload = mapper.writeValueAsString(root);
+            HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
 
-            log.info("Sending chatbot request to Gemini API (image: {})...", imageBase64 != null ? "yes" : "no");
+            log.info("Sending chatbot request to Gemini API. Payload: {}", jsonPayload);
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
             JsonNode responseBody = mapper.readTree(response.getBody());
@@ -188,8 +190,11 @@ public class ChatBotService {
             log.info("Chatbot reply received successfully");
             return reply;
 
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("ChatBot Gemini API HTTP error: {} - Response Body: {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            return "Xin lỗi, mình đang gặp sự cố kỹ thuật. Vui lòng thử lại sau nhé! 😊";
         } catch (Exception e) {
-            log.error("ChatBot Gemini API error: {}", e.getMessage());
+            log.error("ChatBot Gemini API error: ", e);
             return "Xin lỗi, mình đang gặp sự cố kỹ thuật. Vui lòng thử lại sau nhé! 😊";
         }
     }

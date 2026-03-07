@@ -9,9 +9,4 @@ public class ChatRequest {
     private List<ChatMessage> history;
     private String image; // Optional: base64 image data URL for design review
 
-    @Data
-    public static class ChatMessage {
-        private String role; // "user" or "assistant"
-        private String content;
-    }
 }

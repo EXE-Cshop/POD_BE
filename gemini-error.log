@@ -1,0 +1,330 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.shirt.pod:pod_be >------------------------
+[INFO] Building pod_be 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.3.1:run (default-cli) > test-compile @ pod_be >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ pod_be ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ pod_be ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ pod_be ---
+[INFO] skip non existing resourceDirectory E:\KhoiNghiep\pod_be\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ pod_be ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.3.1:run (default-cli) < test-compile @ pod_be <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.3.1:run (default-cli) @ pod_be ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.1)
+
+2026-03-07T12:24:14.527+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : Starting PodBeApplication using Java 21.0.7 with PID 16756 (E:\KhoiNghiep\pod_be\target\classes started by Admin in E:\KhoiNghiep\pod_be)
+2026-03-07T12:24:14.529+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-03-07T12:24:14.563+07:00  INFO 16756 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-03-07T12:24:14.563+07:00  INFO 16756 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-03-07T12:24:15.238+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-07T12:24:15.239+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-07T12:24:15.371+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 128 ms. Found 14 JPA repository interfaces.
+2026-03-07T12:24:15.381+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-07T12:24:15.382+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-03-07T12:24:15.393+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.BaseProductRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.393+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.CartItemRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.CartRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.LogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.OrderItemRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.OrderRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.PrintAreaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.ProductVariantRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.394+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.RefreshTokenRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.395+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.395+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.SavedDesignRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.395+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.StickerRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.395+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:24:15.395+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 Redis repository interfaces.
+2026-03-07T12:24:15.963+07:00  INFO 16756 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-07T12:24:15.972+07:00  INFO 16756 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-07T12:24:15.972+07:00  INFO 16756 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.25]
+2026-03-07T12:24:16.010+07:00  INFO 16756 --- [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-07T12:24:16.011+07:00  INFO 16756 --- [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1447 ms
+2026-03-07T12:24:16.064+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-07T12:24:16.185+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7400baf0
+2026-03-07T12:24:16.186+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-07T12:24:16.248+07:00  INFO 16756 --- [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-07T12:24:16.293+07:00  INFO 16756 --- [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-03-07T12:24:16.321+07:00  INFO 16756 --- [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-07T12:24:16.516+07:00  INFO 16756 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-07T12:24:16.554+07:00  WARN 16756 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-07T12:24:17.409+07:00  INFO 16756 --- [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-07T12:24:17.545+07:00  INFO 16756 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07T12:24:17.882+07:00  INFO 16756 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-07T12:24:18.506+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : === Cloudinary Configuration ===
+2026-03-07T12:24:18.507+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : Cloud Name: di5j3h6wi
+2026-03-07T12:24:18.507+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : API Key: 2274***
+2026-03-07T12:24:18.514+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : Cloudinary initialized successfully!
+2026-03-07T12:24:18.553+07:00  INFO 16756 --- [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-07T12:24:18.553+07:00  WARN 16756 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-03-07T12:24:19.024+07:00 DEBUG 16756 --- [  restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-03-07T12:24:19.140+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.b.a.DbSchedulerAutoConfiguration : Creating db-scheduler using tasks from Spring context: [RecurringTask name=process-pending-orders-task, onComplete=OnCompleteReschedule with FixedDelay duration=PT5M]
+2026-03-07T12:24:19.148+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.j.AutodetectJdbcCustomization    : Detected database PostgreSQL.
+2026-03-07T12:24:19.148+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.j.AutodetectJdbcCustomization    : Using PostgreSQL jdbc-overrides.
+2026-03-07T12:24:19.152+07:00  INFO 16756 --- [  restartedMain] c.g.k.scheduler.SchedulerBuilder         : Creating scheduler with configuration: threads=5, pollInterval=30s, heartbeat=300s enable-immediate-execution=false, table-name=scheduled_tasks, name=DESKTOP-2BC4GRK
+2026-03-07T12:24:19.157+07:00  INFO 16756 --- [  restartedMain] c.g.kagkarlsson.scheduler.Scheduler      : Using polling-strategy: type=FETCH, lowerLimit=0.5, upperLimit=3.0
+2026-03-07T12:24:19.160+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.b.config.startup.ImmediateStart  : Triggering scheduler start
+2026-03-07T12:24:19.160+07:00  INFO 16756 --- [  restartedMain] c.g.kagkarlsson.scheduler.Scheduler      : Starting scheduler.
+2026-03-07T12:24:19.548+07:00  INFO 16756 --- [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-07T12:24:19.577+07:00  INFO 16756 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-07T12:24:19.586+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : Started PodBeApplication in 5.343 seconds (process running for 5.684)
+2026-03-07T12:24:19.593+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : ========== Starting Data Seeder ==========
+2026-03-07T12:24:19.691+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Synced 22 permissions
+2026-03-07T12:24:19.710+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Created/Updated SUPER_ADMIN role with 22 permissions
+2026-03-07T12:24:19.752+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Created/Updated USER role with 6 permissions
+2026-03-07T12:24:19.759+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Admin user already exists: admin
+2026-03-07T12:24:19.766+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Products already seeded, skipping product flow seeding.
+2026-03-07T12:24:19.766+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : ========== Data Seeder Completed ==========
+2026-03-07T12:26:01.272+07:00  INFO 16756 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-07T12:26:01.272+07:00  INFO 16756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-07T12:26:01.274+07:00  INFO 16756 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-03-07T12:26:01.283+07:00 DEBUG 16756 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/chatbot
+2026-03-07T12:26:01.287+07:00 DEBUG 16756 --- [nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-03-07T12:26:01.288+07:00 DEBUG 16756 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/chatbot
+2026-03-07T12:26:01.352+07:00  INFO 16756 --- [nio-8080-exec-1] c.s.pod.controller.ChatBotController     : Chatbot request: hello (has image: false)
+2026-03-07T12:26:01.358+07:00  INFO 16756 --- [nio-8080-exec-1] com.shirt.pod.service.ChatBotService     : Sending chatbot request to Gemini API. Payload: {"systemInstruction":{"parts":[{"text":"Bạn là trợ lý AI chính thức của cửa hàng áo thun POD Print (Print On Demand).\nTên bạn: POD Print AI Assistant.\n\n=== PHẠM VI TRẢ LỜI (CHỈ trả lời các chủ đề sau) ===\n\n1. **Hướng dẫn sử dụng trang web:**\n   - Cách duyệt sản phẩm trong Catalog\n   - Cách thêm sản phẩm vào giỏ hàng và thanh toán (Checkout)\n   - Cách xem lại đơn hàng (My Orders)\n   - Cách đăng ký, đăng nhập tài khoản\n\n2. **Công cụ Design Editor (Thiết kế áo):**\n   - Cách vào Design Editor: chọn sản phẩm trong Catalog → bấm \"Customize This Product\"\n   - Cách upload hình ảnh, thêm text, chỉnh màu sắc lên áo\n   - Cách xem trước thiết kế trên sản phẩm\n   - Cách lưu và đặt hàng thiết kế của bạn\n\n3. **Virtual Try-On (Thử đồ ảo):**\n   - Cách sử dụng: Upload ảnh cá nhân + chọn áo → AI ghép áo lên người\n   - Mẹo chụp ảnh đẹp: ảnh toàn thân, nền sáng, đứng thẳng, ánh sáng đều\n   - Tránh: ảnh bị cắt, tay khoanh, ngồi, nền rối\n\n4. **Tư vấn chọn size áo:**\n   - S: Ngực 86-90cm, Cao 155-165cm, Nặng 45-55kg\n   - M: Ngực 90-96cm, Cao 160-170cm, Nặng 55-65kg\n   - L: Ngực 96-102cm, Cao 165-175cm, Nặng 65-75kg\n   - XL: Ngực 102-108cm, Cao 170-180cm, Nặng 75-85kg\n   - 2XL: Ngực 108-114cm, Cao 175-185cm, Nặng 85-95kg\n\n5. **Gợi ý phối đồ / style:**\n   - Tư vấn kiểu áo theo dáng người\n   - Regular fit, Slim fit, Oversize\n   - Gợi ý phối màu\n\n6. **Thông tin giao hàng & đơn hàng:**\n   - Nội thành: 1-2 ngày làm việc\n   - Ngoại thành: 3-5 ngày làm việc\n   - Miễn phí ship cho đơn từ 500.000đ\n\n7. **Đánh giá thiết kế áo (Design Review):**\n   Khi khách hàng gửi ảnh thiết kế áo, hãy đánh giá chuyên nghiệp:\n   - Bố cục: cân đối, tỉ lệ vàng, vị trí các element\n   - Phối màu: hài hòa, tương phản tốt, dễ nhìn\n   - Typography: font chữ phù hợp, kích thước, khoảng cách\n   - Tổng thể: áo có bắt mắt không, có chuyên nghiệp không\n   - Cho điểm /10 và gợi ý 2-3 cách cải thiện cụ thể\n   - Trả lời thân thiện, khích lệ sáng tạo\n\n=== QUY TẮC BẮT BUỘC ===\n- Trả lời bằng tiếng Việt, thân thiện, ngắn gọn\n- Dùng emoji phù hợp\n- Dùng **bold** cho từ khóa quan trọng\n- KHÔNG trả lời câu hỏi ngoài phạm vi\n- Nếu ngoài phạm vi: \"Mình chỉ hỗ trợ các vấn đề liên quan đến POD Print thôi nhé! 😊\"\n- KHÔNG bịa thông tin về giá cả cụ thể\n- Giữ câu trả lời tối đa 200 từ\n"}]},"contents":[{"role":"user","parts":[{"text":"hello"}]}],"generationConfig":{"temperature":0.7,"maxOutputTokens":800}}
+2026-03-07T12:26:18.263+07:00 ERROR 16756 --- [nio-8080-exec-1] com.shirt.pod.service.ChatBotService     : ChatBot Gemini API HTTP error: 403 FORBIDDEN - Response Body: {
+  "error": {
+    "code": 403,
+    "message": "Your API key was reported as leaked. Please use another API key.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+
+
+org.springframework.web.client.HttpClientErrorException$Forbidden: 403 Forbidden: "{<EOL>  "error": {<EOL>    "code": 403,<EOL>    "message": "Your API key was reported as leaked. Please use another API key.",<EOL>    "status": "PERMISSION_DENIED"<EOL>  }<EOL>}<EOL>"
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:109) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:183) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:137) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.ResponseErrorHandler.handleError(ResponseErrorHandler.java:63) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:942) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:891) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:790) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.client.RestTemplate.postForEntity(RestTemplate.java:538) ~[spring-web-6.1.10.jar:6.1.10]
+	at com.shirt.pod.service.ChatBotService.chat(ChatBotService.java:182) ~[classes/:na]
+	at com.shirt.pod.controller.ChatBotController.chat(ChatBotController.java:22) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.25.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.25.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at com.shirt.pod.config.LoggingFilter.doFilterInternal(LoggingFilter.java:39) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at com.shirt.pod.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:61) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.1.jar:6.3.1]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.10.jar:6.1.10]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:389) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:904) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.25.jar:10.1.25]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2026-03-07T12:28:19.253+07:00  INFO 16756 --- [pool-1-thread-1] c.shirt.pod.service.impl.OrderScheduler  : === DB-SCHEDULER: Starting scheduled task ===
+2026-03-07T12:28:19.254+07:00  INFO 16756 --- [pool-1-thread-1] c.s.pod.service.impl.OrderServiceImpl    : Starting scheduled task: Processing PENDING orders
+2026-03-07T12:28:19.258+07:00  INFO 16756 --- [pool-1-thread-1] c.s.pod.service.impl.OrderServiceImpl    : No PENDING orders found to process
+2026-03-07T12:28:19.258+07:00  INFO 16756 --- [pool-1-thread-1] c.shirt.pod.service.impl.OrderScheduler  : === DB-SCHEDULER: Completed successfully ===
+2026-03-07T12:29:38.586+07:00  INFO 16756 --- [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-03-07T12:29:38.603+07:00  INFO 16756 --- [       Thread-5] c.g.kagkarlsson.scheduler.Scheduler      : Shutting down Scheduler.
+2026-03-07T12:29:38.603+07:00  INFO 16756 --- [       Thread-5] c.github.kagkarlsson.scheduler.Executor  : Letting running executions finish. Will wait up to 2xPT30M.
+2026-03-07T12:29:38.603+07:00  INFO 16756 --- [       Thread-5] c.github.kagkarlsson.scheduler.Executor  : Scheduler stopped.
+2026-03-07T12:29:38.608+07:00  INFO 16756 --- [       Thread-5] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07T12:29:38.610+07:00  INFO 16756 --- [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-03-07T12:29:38.612+07:00  INFO 16756 --- [       Thread-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.1)
+
+2026-03-07T12:29:38.690+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : Starting PodBeApplication using Java 21.0.7 with PID 16756 (E:\KhoiNghiep\pod_be\target\classes started by Admin in E:\KhoiNghiep\pod_be)
+2026-03-07T12:29:38.690+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-03-07T12:29:38.945+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-07T12:29:38.945+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-07T12:29:38.981+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 35 ms. Found 14 JPA repository interfaces.
+2026-03-07T12:29:38.984+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-07T12:29:38.984+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.BaseProductRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.CartItemRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.CartRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.LogRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.OrderItemRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.OrderRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.989+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.PrintAreaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.ProductVariantRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.RefreshTokenRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.SavedDesignRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.StickerRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.shirt.pod.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-03-07T12:29:38.990+07:00  INFO 16756 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 5 ms. Found 0 Redis repository interfaces.
+2026-03-07T12:29:39.144+07:00  INFO 16756 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-07T12:29:39.146+07:00  INFO 16756 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-07T12:29:39.146+07:00  INFO 16756 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.25]
+2026-03-07T12:29:39.161+07:00  INFO 16756 --- [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-07T12:29:39.161+07:00  INFO 16756 --- [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 468 ms
+2026-03-07T12:29:39.187+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-03-07T12:29:39.219+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@71be3ab2
+2026-03-07T12:29:39.219+07:00  INFO 16756 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-03-07T12:29:39.240+07:00  INFO 16756 --- [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-07T12:29:39.242+07:00  INFO 16756 --- [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-07T12:29:39.248+07:00  INFO 16756 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-07T12:29:39.254+07:00  WARN 16756 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-07T12:29:39.454+07:00  INFO 16756 --- [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-07T12:29:39.554+07:00  INFO 16756 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07T12:29:39.824+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : === Cloudinary Configuration ===
+2026-03-07T12:29:39.824+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : Cloud Name: di5j3h6wi
+2026-03-07T12:29:39.824+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : API Key: 2274***
+2026-03-07T12:29:39.825+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.CloudinaryConfig    : Cloudinary initialized successfully!
+2026-03-07T12:29:39.844+07:00  INFO 16756 --- [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-07T12:29:39.844+07:00  WARN 16756 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-03-07T12:29:40.133+07:00 DEBUG 16756 --- [  restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-03-07T12:29:40.193+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.b.a.DbSchedulerAutoConfiguration : Creating db-scheduler using tasks from Spring context: [RecurringTask name=process-pending-orders-task, onComplete=OnCompleteReschedule with FixedDelay duration=PT5M]
+2026-03-07T12:29:40.194+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.j.AutodetectJdbcCustomization    : Detected database PostgreSQL.
+2026-03-07T12:29:40.194+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.j.AutodetectJdbcCustomization    : Using PostgreSQL jdbc-overrides.
+2026-03-07T12:29:40.194+07:00  INFO 16756 --- [  restartedMain] c.g.k.scheduler.SchedulerBuilder         : Creating scheduler with configuration: threads=5, pollInterval=30s, heartbeat=300s enable-immediate-execution=false, table-name=scheduled_tasks, name=DESKTOP-2BC4GRK
+2026-03-07T12:29:40.194+07:00  INFO 16756 --- [  restartedMain] c.g.kagkarlsson.scheduler.Scheduler      : Using polling-strategy: type=FETCH, lowerLimit=0.5, upperLimit=3.0
+2026-03-07T12:29:40.196+07:00  INFO 16756 --- [  restartedMain] c.g.k.s.b.config.startup.ImmediateStart  : Triggering scheduler start
+2026-03-07T12:29:40.196+07:00  INFO 16756 --- [  restartedMain] c.g.kagkarlsson.scheduler.Scheduler      : Starting scheduler.
+2026-03-07T12:29:40.321+07:00  INFO 16756 --- [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-03-07T12:29:40.338+07:00  INFO 16756 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-07T12:29:40.343+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.PodBeApplication           : Started PodBeApplication in 1.688 seconds (process running for 326.441)
+2026-03-07T12:29:40.344+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : ========== Starting Data Seeder ==========
+2026-03-07T12:29:40.381+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Synced 22 permissions
+2026-03-07T12:29:40.386+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Created/Updated SUPER_ADMIN role with 22 permissions
+2026-03-07T12:29:40.408+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Created/Updated USER role with 6 permissions
+2026-03-07T12:29:40.411+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Admin user already exists: admin
+2026-03-07T12:29:40.413+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : Products already seeded, skipping product flow seeding.
+2026-03-07T12:29:40.413+07:00  INFO 16756 --- [  restartedMain] com.shirt.pod.config.DataSeeder          : ========== Data Seeder Completed ==========
+2026-03-07T12:29:40.417+07:00  INFO 16756 --- [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  06:54 min
+[INFO] Finished at: 2026-03-07T12:31:06+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.3.1:run (default-cli) on project pod_be: Process terminated with exit code: -1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

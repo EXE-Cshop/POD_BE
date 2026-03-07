@@ -52,11 +52,11 @@ cloudinary:
 
 # Hugging Face Configuration (for Virtual Try-On)
 huggingface:
-  api-key: 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
+  api-key: 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
 
 # Gemini AI Configuration (for AI Chatbot)
 gemini:
-  api-key: AIzaSyAdEKAi_S_5EdnPpjTlsl6GtO4UeG4sYC0
+  api-key: AIzaSyDGFZezQgN7FCKpSwdcFqohRajdhEu8LAQ
   model: gemini-2.5-flash
 
 open:
