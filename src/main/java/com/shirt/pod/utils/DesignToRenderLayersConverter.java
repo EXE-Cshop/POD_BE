@@ -98,10 +98,17 @@ public final class DesignToRenderLayersConverter {
                 .zIndex(idx);
 
         if ("textbox".equals(type)) {
+            double baseW = toDouble(obj.get("width"), 100);
             b.text(String.valueOf(obj.getOrDefault("text", "")))
                     .fontFamily(String.valueOf(obj.getOrDefault("fontFamily", "Arial")))
                     .fontSize(toInt(obj.get("fontSize"), 24))
-                    .fontColor(String.valueOf(obj.getOrDefault("fill", "#000000")));
+                    .fontColor(String.valueOf(obj.getOrDefault("fill", "#000000")))
+                    .fontWeight(String.valueOf(obj.getOrDefault("fontWeight", "normal")))
+                    .fontStyle(String.valueOf(obj.getOrDefault("fontStyle", "normal")))
+                    .textAlign(String.valueOf(obj.getOrDefault("textAlign", "left")))
+                    .scaleX(scaleX)
+                    .scaleY(scaleY)
+                    .textBoxWidthCanvasPx(baseW);
         } else {
             String url = String.valueOf(obj.getOrDefault("src", ""));
             b.url(url != null && !url.equals("null") ? url : "")

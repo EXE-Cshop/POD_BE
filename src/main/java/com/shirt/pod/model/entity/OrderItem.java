@@ -1,11 +1,6 @@
 package com.shirt.pod.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,4 +31,8 @@ public class OrderItem extends BaseEntityCreatedOnly {
 
     @Column(name = "production_status")
     private String productionStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "custom_product_id")
+    private CustomProduct customProduct;
 }

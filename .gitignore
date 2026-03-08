@@ -37,3 +37,5 @@ build/
 
 ### Local config (do not push) ###
 **/SecurityConfig.java
+
+**/application.yaml

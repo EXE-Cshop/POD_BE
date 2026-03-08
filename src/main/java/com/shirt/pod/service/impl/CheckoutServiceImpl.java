@@ -71,10 +71,17 @@ public class CheckoutServiceImpl implements CheckoutService {
         // Create order items from cart items
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getItems()) {
+            String printUrl = null;
+            if (cartItem.getCustomProduct() != null) {
+                printUrl = cartItem.getCustomProduct().getFrontPrintUrl();
+            }
             OrderItem orderItem = OrderItem.builder()
+                    .orderId(savedOrder.getId())
                     .quantity(cartItem.getQuantity())
                     .unitPrice(cartItem.getPrice())
+                    .printFileUrl(printUrl)
                     .productionStatus("WAITING")
+                    .customProduct(cartItem.getCustomProduct())
                     .build();
             orderItems.add(orderItem);
         }

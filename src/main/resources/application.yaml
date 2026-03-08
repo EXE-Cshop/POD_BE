@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://nn0469971_db_user:vinh123@pod.fzzmyug.mongodb.net/?appName=POD
+      uri: mongodb+srv://nn0469971_db_user:vinh123456@pod.fzzmyug.mongodb.net/?appName=POD
       database: POD
       authentication-database: admin
   security:
@@ -61,7 +61,7 @@ huggingface:
 
 # Gemini AI Configuration (for AI Chatbot)
 gemini:
-  api-key: AIzaSyDGFZezQgN7FCKpSwdcFqohRajdhEu8LAQ
+  api-key: AIzaSyDVhbnMcBRP2QLmbI727Xc11ffq6MvvibI
   model: gemini-2.5-flash
 
 open:
