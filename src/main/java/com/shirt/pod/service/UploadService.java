@@ -7,6 +7,9 @@ import java.util.Map;
 public interface UploadService {
     Map<String, String> uploadImage(MultipartFile file);
 
+    /** Upload ảnh sticker lên Cloudinary (folder tshirt-pod/stickers) */
+    Map<String, String> uploadSticker(MultipartFile file);
+
     /**
      * Upload image từ byte[] (file được generate trong backend).
      *
@@ -18,4 +21,11 @@ public interface UploadService {
     Map<String, String> uploadImageBytes(byte[] bytes, String filename, String contentType);
 
     boolean deleteImage(String publicId);
+
+    /**
+     * Xóa ảnh trên Cloudinary từ URL. Chỉ hoạt động với URL res.cloudinary.com.
+     * @param cloudinaryUrl full URL (https://res.cloudinary.com/...)
+     * @return true nếu xóa thành công, false nếu URL không hợp lệ hoặc xóa thất bại
+     */
+    boolean deleteImageByUrl(String cloudinaryUrl);
 }

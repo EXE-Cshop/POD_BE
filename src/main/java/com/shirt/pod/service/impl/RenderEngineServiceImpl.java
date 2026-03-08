@@ -12,10 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.PNGTranscoder;
-
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,7 +49,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
         try {
             log.info("Start renderPrintFile, width_mm={}, height_mm={}, dpi={}, layer_count={}",
-                    request.getWidthMm(), request.getHeightMm(), request.getDpi(), 
+                    request.getWidthMm(), request.getHeightMm(), request.getDpi(),
                     request.getLayers() != null ? request.getLayers().size() : 0);
 
             if (request.getLayers() == null || request.getLayers().isEmpty()) {
@@ -93,15 +89,17 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             String fileUrl;
             long fileSize;
 
-            // Ưu tiên upload qua UploadService (Cloudinary), nếu fail thì fallback lưu local
+            // Ưu tiên upload qua UploadService (Cloudinary), nếu fail thì fallback lưu
+            // local
             try {
-                log.debug("Uploading rendered image via UploadService (bytes), size={} bytes", bytes.length);
+                log.info("Uploading rendered preview to Cloudinary, size={} bytes", bytes.length);
                 var uploadResult = uploadService.uploadImageBytes(bytes, "render.png", "image/png");
                 fileUrl = uploadResult.get("url");
                 fileSize = bytes.length;
                 log.info("Rendered print file uploaded via UploadService: {}", fileUrl);
             } catch (Exception ex) {
-                log.warn("Upload via UploadService failed, fallback to local file storage. Reason: {}", ex.getMessage(), ex);
+                log.warn("Upload via UploadService failed, fallback to local file storage. Reason: {}", ex.getMessage(),
+                        ex);
                 File localFile = saveLocalPng(bytes);
                 fileUrl = localFile.getAbsolutePath();
                 fileSize = localFile.length();
@@ -132,7 +130,7 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
     /** Composite garment image + design buffer = full mockup. */
     private BufferedImage compositeGarmentWithDesign(RenderPrintRequest request, BufferedImage designBuffer,
-                                                     int designW, int designH, List<File> tempFiles) {
+            int designW, int designH, List<File> tempFiles) {
         BufferedImage garment = loadImageFromUrl(request.getGarmentImageUrl(), tempFiles);
         int gw = garment.getWidth();
         int gh = garment.getHeight();
@@ -160,20 +158,26 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             if (url.startsWith("data:")) {
                 byte[] bytes = parseDataUrlToBytes(url);
                 try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-                    return ImageIO.read(bais);
+                    BufferedImage img = ImageIO.read(bais);
+                    if (img == null)
+                        throw new AppException(ErrorCode.IMAGE_READ_FAILED, url.substring(0, Math.min(80, url.length())));
+                    return img;
                 }
             }
+            String fetchUrl = toPngIfCloudinaryWebp(url);
             File tmp = File.createTempFile("garment_", ".img");
-            try (InputStream in = URI.create(url).toURL().openStream()) {
+            try (InputStream in = URI.create(fetchUrl).toURL().openStream()) {
                 Files.copy(in, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             tempFiles.add(tmp);
             BufferedImage img = ImageIO.read(tmp);
-            if (img == null) throw new AppException(ErrorCode.IMAGE_READ_FAILED, url);
+            if (img == null)
+                throw new AppException(ErrorCode.IMAGE_READ_FAILED, url);
             return img;
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
+            log.error("Failed to load image from URL: {}", url != null && url.length() > 100 ? url.substring(0, 100) + "..." : url, e);
             throw new AppException(ErrorCode.IMAGE_READ_FAILED, url);
         }
     }
@@ -213,9 +217,10 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             log.debug("Rendering layer type={}, z_index={}, url/text_sample={}",
                     type,
                     layer.getZIndex(),
-                    "image".equals(type) ? layer.getUrl() : (layer.getText() != null && layer.getText().length() > 20
-                            ? layer.getText().substring(0, 20) + "..."
-                            : layer.getText()));
+                    "image".equals(type) ? layer.getUrl()
+                            : (layer.getText() != null && layer.getText().length() > 20
+                                    ? layer.getText().substring(0, 20) + "..."
+                                    : layer.getText()));
             switch (type) {
                 case "image" -> renderPrintImageLayerMm(g2d, layer, dpi, tempFiles);
                 case "text" -> renderPrintTextLayerMm(g2d, layer, dpi);
@@ -233,17 +238,15 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.INVALID_INPUT, "url");
         }
         try {
+            String fetchUrl = toPngIfCloudinaryWebp(layer.getUrl());
             File imageFile;
-            boolean isSvg = layer.getUrl().toLowerCase().contains("svg");
-            if (layer.getUrl().startsWith("data:")) {
-                // Data URL - backend doesn't need to fetch; avoids localhost/CORS issues
-                byte[] bytes = parseDataUrlToBytes(layer.getUrl());
-                String ext = isSvg ? ".svg" : ".img";
-                imageFile = File.createTempFile("layer_", ext);
+            if (fetchUrl.startsWith("data:")) {
+                byte[] bytes = parseDataUrlToBytes(fetchUrl);
+                imageFile = File.createTempFile("layer_", ".png");
                 Files.write(imageFile.toPath(), bytes);
             } else {
-                imageFile = File.createTempFile("layer_", isSvg ? ".svg" : ".img");
-                URI uri = URI.create(layer.getUrl());
+                imageFile = File.createTempFile("layer_", ".png");
+                URI uri = URI.create(fetchUrl);
                 try (InputStream in = uri.toURL().openStream()) {
                     Files.copy(in, imageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -255,20 +258,13 @@ public class RenderEngineServiceImpl implements RenderEngineService {
 
             BufferedImage image = ImageIO.read(imageFile);
             if (image == null) {
-                // ImageIO cannot read SVG; use Batik to rasterize
-                String url = layer.getUrl().toLowerCase();
-                boolean isSvg1 = url.endsWith(".svg") || url.contains("image/svg+xml");
-                if (isSvg1) {
-                    image = rasterizeSvgToBufferedImage(imageFile, wPx, hPx);
-                }
-                if (image == null) {
-                    throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
-                }
+                throw new AppException(ErrorCode.IMAGE_READ_FAILED, layer.getUrl());
             }
 
             int xPx = UnitConverter.mmToPixels(layer.getXMm(), dpi);
             int yPx = UnitConverter.mmToPixels(layer.getYMm(), dpi);
-            double rotationRad = layer.getRotationDeg() != null ? UnitConverter.degreeToRadian(layer.getRotationDeg()) : 0;
+            double rotationRad = layer.getRotationDeg() != null ? UnitConverter.degreeToRadian(layer.getRotationDeg())
+                    : 0;
             log.debug("Image layer: url={}, x_px={}, y_px={}, w_px={}, h_px={}, rotation_deg={}, opacity={}",
                     layer.getUrl(), xPx, yPx, wPx, hPx, layer.getRotationDeg(), layer.getOpacity());
 
@@ -305,38 +301,247 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             Graphics2D g2d,
             PrintDesignLayerRequest layer,
             int dpi) {
-        if (layer.getText() == null) return;
+
+        if (layer.getText() == null || layer.getText().isBlank())
+            return;
 
         int xPx = UnitConverter.mmToPixels(layer.getXMm(), dpi);
         int yPx = UnitConverter.mmToPixels(layer.getYMm(), dpi);
-        double rotationRad = layer.getRotationDeg() != null ? UnitConverter.degreeToRadian(layer.getRotationDeg()) : 0;
+        int widthPx = UnitConverter.mmToPixels(layer.getWidthMm(), dpi);
+        int heightPx = UnitConverter.mmToPixels(layer.getHeightMm(), dpi);
 
-        AffineTransform oldTx = null;
-        if (Math.abs(rotationRad) > 1e-6) {
-            oldTx = g2d.getTransform();
-            g2d.translate(xPx, yPx);
-            g2d.rotate(rotationRad);
-            g2d.translate(-xPx, -yPx);
+        double rotationRad = layer.getRotationDeg() != null
+                ? UnitConverter.degreeToRadian(layer.getRotationDeg())
+                : 0;
+
+        double scaleX = layer.getScaleX() != null ? layer.getScaleX() : 1.0;
+        double scaleY = layer.getScaleY() != null ? layer.getScaleY() : 1.0;
+        double textBoxWidthCanvas = layer.getTextBoxWidthCanvasPx() != null
+                ? layer.getTextBoxWidthCanvasPx() : 100.0;
+
+        double canvasToRender = (double) widthPx / (textBoxWidthCanvas * scaleX);
+
+        int fontStyleInt = toJavaFontStyle(
+                layer.getFontWeight() != null ? layer.getFontWeight().toLowerCase() : "normal",
+                layer.getFontStyle() != null ? layer.getFontStyle().toLowerCase() : "normal");
+
+        int canvasFontSize = layer.getFontSize() != null ? layer.getFontSize() : 24;
+        int renderFontSize = (int) Math.max(Math.round(canvasFontSize * canvasToRender), 1);
+
+        String fontFamily = layer.getFontFamily() != null ? layer.getFontFamily() : "Arial";
+        if (fontFamily.contains(",")) fontFamily = fontFamily.split(",")[0].trim();
+
+        Font font = new Font(fontFamily, fontStyleInt, renderFontSize);
+
+        int wrapWidth = (int) Math.round(textBoxWidthCanvas * canvasToRender);
+        BufferedImage textBuffer = renderTextToBuffer(font, layer, wrapWidth);
+
+        if (textBuffer == null)
+            return;
+
+        double sx = (double) widthPx / textBuffer.getWidth();
+        double sy = (double) heightPx / textBuffer.getHeight();
+        double cx = xPx + widthPx / 2.0;
+        double cy = yPx + heightPx / 2.0;
+
+        AffineTransform tx = new AffineTransform();
+        tx.translate(cx, cy);
+        tx.rotate(rotationRad);
+        tx.translate(-widthPx / 2.0, -heightPx / 2.0);
+        tx.scale(sx, sy);
+
+        Composite old = g2d.getComposite();
+
+        if (layer.getOpacity() != null) {
+            g2d.setComposite(
+                    AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER,
+                            layer.getOpacity().floatValue()));
         }
 
-        g2d.setFont(new Font(
-                layer.getFontFamily() == null ? "Arial" : layer.getFontFamily(),
-                Font.PLAIN,
-                layer.getFontSize() == null ? 24 : layer.getFontSize()));
-        int[] rgb = UnitConverter.parseHexColor(
-                layer.getFontColor() == null ? "#000000" : layer.getFontColor());
-        g2d.setColor(new Color(rgb[0], rgb[1], rgb[2]));
+        g2d.drawImage(textBuffer, tx, null);
+        g2d.setComposite(old);
 
-        log.debug("Text layer: text_sample=\"{}\", x_px={}, y_px={}, font_family={}, font_size={}, color={}",
+        log.debug("Text layer: text=\"{}\", canvasFont={}, renderFont={}, wrapWidth={}, "
+                        + "scaleX={}, scaleY={}, box={}x{}px",
                 layer.getText().length() > 30 ? layer.getText().substring(0, 30) + "..." : layer.getText(),
-                xPx, yPx, layer.getFontFamily(), layer.getFontSize(), layer.getFontColor());
-        g2d.drawString(layer.getText(), xPx, yPx);
-
-        if (oldTx != null) {
-            g2d.setTransform(oldTx);
-        }
+                canvasFontSize, renderFontSize, wrapWidth, scaleX, scaleY, widthPx, heightPx);
     }
 
+    private BufferedImage renderTextToBuffer(
+            Font font,
+            PrintDesignLayerRequest layer,
+            int maxWidthPx) {
+
+        String text = layer.getText();
+        if (text == null || text.isBlank())
+            return null;
+
+        int[] rgb = UnitConverter.parseHexColor(
+                layer.getFontColor() != null ? layer.getFontColor() : "#000000");
+
+        Color color = new Color(rgb[0], rgb[1], rgb[2]);
+
+        String textAlign = layer.getTextAlign() != null
+                ? layer.getTextAlign().toLowerCase()
+                : "left";
+
+        // temporary graphics for metrics
+        BufferedImage tmp = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = tmp.createGraphics();
+        g2d.setFont(font);
+
+        FontMetrics fm = g2d.getFontMetrics();
+
+        int wrapWidth = Math.max(maxWidthPx, 20);
+
+        List<String> lines = new ArrayList<>();
+
+        for (String raw : text.split("\n", -1)) {
+            lines.addAll(wrapTextToWidth(fm, raw, wrapWidth));
+        }
+
+        if (lines.isEmpty()) {
+            g2d.dispose();
+            return null;
+        }
+
+        int lineHeight = fm.getHeight();
+        int totalHeight = lineHeight * lines.size();
+
+        BufferedImage buffer = new BufferedImage(
+                maxWidthPx,
+                totalHeight,
+                BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g = setupGraphics2D(buffer);
+        g.setFont(font);
+        g.setColor(color);
+
+        int ascent = fm.getAscent();
+        int y = ascent;
+
+        for (String line : lines) {
+
+            int lineWidth = fm.stringWidth(line);
+            int x = 0;
+
+            if ("center".equals(textAlign)) {
+                x = (maxWidthPx - lineWidth) / 2;
+            } else if ("right".equals(textAlign)) {
+                x = maxWidthPx - lineWidth;
+            }
+
+            g.drawString(line, x, y);
+            y += lineHeight;
+        }
+
+        g.dispose();
+        g2d.dispose();
+
+        return buffer;
+    }
+
+    private List<String> wrapTextToWidth(FontMetrics fm, String text, int maxWidthPx) {
+
+        List<String> lines = new ArrayList<>();
+    
+        if (text == null || text.isEmpty()) {
+            lines.add("");
+            return lines;
+        }
+    
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+    
+        for (String word : words) {
+    
+            String testLine = currentLine.length() == 0
+                    ? word
+                    : currentLine + " " + word;
+    
+            if (fm.stringWidth(testLine) <= maxWidthPx) {
+    
+                if (currentLine.length() > 0) {
+                    currentLine.append(" ");
+                }
+    
+                currentLine.append(word);
+    
+            } else {
+    
+                if (currentLine.length() > 0) {
+                    lines.add(currentLine.toString());
+                    currentLine = new StringBuilder();
+                }
+    
+                if (fm.stringWidth(word) <= maxWidthPx) {
+    
+                    currentLine.append(word);
+    
+                } else {
+    
+                    StringBuilder charLine = new StringBuilder();
+    
+                    for (char c : word.toCharArray()) {
+    
+                        String t = charLine.toString() + c;
+    
+                        if (fm.stringWidth(t) <= maxWidthPx) {
+    
+                            charLine.append(c);
+    
+                        } else {
+    
+                            lines.add(charLine.toString());
+                            charLine = new StringBuilder(String.valueOf(c));
+                        }
+                    }
+    
+                    currentLine = charLine;
+                }
+            }
+        }
+    
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
+        }
+    
+        return lines;
+    }
+
+    private static int toJavaFontStyle(String fontWeight, String fontStyle) {
+        boolean bold = "bold".equals(fontWeight);
+        boolean italic = "italic".equals(fontStyle);
+        if (bold && italic)
+            return Font.BOLD | Font.ITALIC;
+        if (bold)
+            return Font.BOLD;
+        if (italic)
+            return Font.ITALIC;
+        return Font.PLAIN;
+    }
+
+    /**
+     * Java ImageIO không đọc được WebP. Với URL Cloudinary .webp, chèn f_png để lấy
+     * PNG.
+     */
+    private String toPngIfCloudinaryWebp(String url) {
+        if (url == null || !url.contains("cloudinary.com"))
+            return url;
+        String lower = url.toLowerCase();
+        if (lower.contains(".webp") || lower.contains("webp")) {
+            String marker = "/image/upload/";
+            int i = url.indexOf(marker);
+            if (i >= 0) {
+                int insertAt = i + marker.length();
+                if (!url.substring(insertAt, Math.min(insertAt + 6, url.length())).startsWith("f_")) {
+                    return url.substring(0, insertAt) + "f_png/" + url.substring(insertAt);
+                }
+            }
+        }
+        return url;
+    }
 
     /** Parse data:image/...;base64,XXX URL to raw bytes. */
     private byte[] parseDataUrlToBytes(String dataUrl) {
@@ -345,28 +550,6 @@ public class RenderEngineServiceImpl implements RenderEngineService {
             throw new AppException(ErrorCode.INVALID_INPUT, "Invalid data URL");
         }
         return Base64.getDecoder().decode(dataUrl.substring(comma + 1));
-    }
-
-    /**
-     * Rasterize SVG file to BufferedImage using Apache Batik (ImageIO cannot read SVG).
-     */
-    private BufferedImage rasterizeSvgToBufferedImage(File svgFile, int widthPx, int heightPx) {
-        try {
-            PNGTranscoder t = new PNGTranscoder();
-            t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) Math.max(1, widthPx));
-            t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) Math.max(1, heightPx));
-            try (InputStream in = Files.newInputStream(svgFile.toPath());
-                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                TranscoderInput input = new TranscoderInput(in);
-                TranscoderOutput output = new TranscoderOutput(out);
-                t.transcode(input, output);
-                out.flush();
-                return ImageIO.read(new ByteArrayInputStream(out.toByteArray()));
-            }
-        } catch (Exception e) {
-            log.warn("SVG rasterize failed for {}: {}", svgFile, e.getMessage());
-            return null;
-        }
     }
 
     private void cleanupTempFiles(List<File> files) {

@@ -53,10 +53,23 @@ public class PrintDesignLayerRequest {
 
     private BigDecimal opacity;
 
-    // Text fields
+    // Text fields (fontFamily, fontSize, fontColor) + CSS từ frontend
     private String text;
     private String fontFamily;
     private Integer fontSize;
     private String fontColor;
+    /** fontWeight: normal | bold */
+    private String fontWeight;
+    /** fontStyle: normal | italic */
+    private String fontStyle;
+    /** textAlign: left | center | right */
+    private String textAlign;
+
+    /** Fabric.js scaleX of the object (for text scaling) */
+    private Double scaleX;
+    /** Fabric.js scaleY of the object (for text scaling) */
+    private Double scaleY;
+    /** Unscaled textbox width in canvas pixels (before scaleX applied) */
+    private Double textBoxWidthCanvasPx;
 }
 

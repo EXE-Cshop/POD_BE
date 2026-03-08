@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,4 +21,8 @@ public class CartItemDTO {
     private BigDecimal price;
     private Integer quantity;
     private BigDecimal subtotal;
+    private String imageUrl;
+    private Long customProductId;
+    private Boolean isCustomDesign;
+    private List<String> availableSizes;
 }

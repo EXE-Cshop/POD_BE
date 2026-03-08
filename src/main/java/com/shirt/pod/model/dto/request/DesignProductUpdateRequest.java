@@ -9,17 +9,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class StickerUpdateRequest {
-
-    @Size(max = 2048)
-    String link;
+public class DesignProductUpdateRequest {
 
     @Size(max = 255)
-    String label;
+    String name;
+
+    Boolean isPublic;
+
+    /** Optional: full design JSON to update content. When set, re-renders preview. */
+    Map<String, Object> designJsonData;
+
+    @Size(max = 2048)
+    String garmentImageUrl;
 }

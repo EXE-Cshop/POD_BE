@@ -1,5 +1,6 @@
 package com.shirt.pod.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -16,10 +18,17 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class StickerDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class DesignProductDTO {
 
     Long id;
-    String link;
-    String label;
+    Long userId;
+    String creatorName;
+    Long baseProductId;
+    String baseProductName;
+    String name;
+    Map<String, Object> designJsonData;
+    String previewImageUrl;
+    Boolean isPublic;
     Instant createdDate;
 }
