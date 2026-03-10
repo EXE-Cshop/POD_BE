@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
-import java.util.Map;
 
 /**
  * Virtual Try-On service using Hugging Face Spaces API (IDM-VTON / Kolors).
