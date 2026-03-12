@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class DesignProductController {
 
     @Operation(summary = "Get all public designs (community gallery)")
     @GetMapping("/public")
+    @PreAuthorize("permitAll()")
     public ApiResponse<List<DesignProductDTO>> getPublicDesigns() {
         return ApiResponse.<List<DesignProductDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -39,6 +41,7 @@ public class DesignProductController {
 
     @Operation(summary = "Get my saved designs")
     @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<List<DesignProductDTO>> getMyDesigns(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails != null ? userDetails.getId() : null;
@@ -51,6 +54,7 @@ public class DesignProductController {
 
     @Operation(summary = "Get design by ID")
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<DesignProductDTO> getById(@PathVariable Long id) {
         return ApiResponse.<DesignProductDTO>builder()
                 .code(HttpStatus.OK.value())
@@ -61,6 +65,7 @@ public class DesignProductController {
 
     @Operation(summary = "Save new design")
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<DesignProductDTO>> create(
             @Valid @RequestBody DesignProductCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -78,6 +83,7 @@ public class DesignProductController {
 
     @Operation(summary = "Update design (name, isPublic, designJsonData)")
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<DesignProductDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody DesignProductUpdateRequest request,
@@ -94,6 +100,7 @@ public class DesignProductController {
 
     @Operation(summary = "Toggle public/private")
     @PatchMapping("/{id}/public")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<DesignProductDTO> setPublic(
             @PathVariable Long id,
             @RequestParam boolean value,
@@ -108,6 +115,7 @@ public class DesignProductController {
 
     @Operation(summary = "Delete design")
     @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

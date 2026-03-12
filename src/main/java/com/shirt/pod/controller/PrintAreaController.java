@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 @RestController
 @RequestMapping("/api/v1/print-areas")
@@ -24,6 +26,7 @@ public class PrintAreaController {
 
     @Operation(summary = "Get list of print areas", description = "Retrieve a paginated list of print areas with optional filters. Use request body to pass filter parameters.")
     @GetMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_VIEW + "')")
     public ApiResponse<Page<PrintAreaDTO>> getAll(@ModelAttribute PrintAreaFilterRequest filterRequest) {
         return ApiResponse.<Page<PrintAreaDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -34,6 +37,7 @@ public class PrintAreaController {
 
     @Operation(summary = "Get print area by ID", description = "Retrieve a single print area by its ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_VIEW + "')")
     public ApiResponse<PrintAreaDTO> getById(@PathVariable Long id) {
         return ApiResponse.<PrintAreaDTO>builder()
                 .code(HttpStatus.OK.value())
@@ -44,6 +48,7 @@ public class PrintAreaController {
 
     @Operation(summary = "Create new print area", description = "Create a new print area for a base product")
     @PostMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_CREATE + "')")
     public ApiResponse<PrintAreaDTO> create(@Valid @RequestBody PrintAreaCreateRequest request) {
         return ApiResponse.<PrintAreaDTO>builder()
                 .code(HttpStatus.CREATED.value())
@@ -54,6 +59,7 @@ public class PrintAreaController {
 
     @Operation(summary = "Update print area", description = "Update an existing print area. Supports partial updates - only provided fields will be updated")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_UPDATE + "')")
     public ApiResponse<PrintAreaDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody PrintAreaUpdateRequest request) {
@@ -66,6 +72,7 @@ public class PrintAreaController {
 
     @Operation(summary = "Delete print area", description = "Delete a print area")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_DELETE + "')")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         printAreaService.delete(id);
         return ApiResponse.<Void>builder()

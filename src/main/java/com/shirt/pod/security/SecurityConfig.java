@@ -65,8 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/chatbot/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers("/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // .requestMatchers("/api/v1/users/**").authenticated()
-                        .anyRequest().permitAll());
+                        .anyRequest().authenticated()); //non test
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 @RestController
 @RequestMapping("/api/v1/base-products")
@@ -24,6 +26,7 @@ public class BaseProductController {
 
     @Operation(summary = "Get list of base products", description = "Retrieve a paginated list of base products with optional filters. Use request body to pass filter parameters.")
     @GetMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_VIEW + "')")
     public ApiResponse<Page<BaseProductDTO>> getAll(@ModelAttribute BaseProductFilterRequest filterRequest) {
         return ApiResponse.<Page<BaseProductDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -34,6 +37,7 @@ public class BaseProductController {
 
     @Operation(summary = "Get base product by ID", description = "Retrieve a single base product by its ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_VIEW + "')")
     public ApiResponse<BaseProductDTO> getById(@PathVariable Long id) {
         return ApiResponse.<BaseProductDTO>builder()
                 .code(HttpStatus.OK.value())
@@ -44,6 +48,7 @@ public class BaseProductController {
 
     @Operation(summary = "Create new base product", description = "Create a new base product template")
     @PostMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_CREATE + "')")
     public ApiResponse<BaseProductDTO> create(@Valid @RequestBody BaseProductCreateRequest request) {
         return ApiResponse.<BaseProductDTO>builder()
                 .code(HttpStatus.CREATED.value())
@@ -54,6 +59,7 @@ public class BaseProductController {
 
     @Operation(summary = "Update base product", description = "Update an existing base product. Supports partial updates - only provided fields will be updated")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_UPDATE + "')")
     public ApiResponse<BaseProductDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody BaseProductUpdateRequest request) {
@@ -66,6 +72,7 @@ public class BaseProductController {
 
     @Operation(summary = "Delete base product", description = "Soft delete a base product by setting active = false")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_DELETE + "')")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         baseProductService.delete(id);
         return ApiResponse.<Void>builder()

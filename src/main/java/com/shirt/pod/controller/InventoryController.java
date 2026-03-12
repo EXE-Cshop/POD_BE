@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/summary")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<InventorySummaryDTO> getInventorySummary() {
         InventorySummaryDTO summary = inventoryService.getInventorySummary();
 
@@ -39,6 +42,7 @@ public class InventoryController {
     }
 
     @GetMapping("/summary/products/{productId}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<InventorySummaryDTO> getInventorySummaryByProduct(
             @PathVariable Long productId) {
         InventorySummaryDTO summary = inventoryService.getInventorySummaryByProduct(productId);
@@ -51,6 +55,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<Page<ProductInventoryDTO>> getProductInventory(
             @RequestParam(required = false) StockStatus status,
             @RequestParam(required = false) String productName,
@@ -76,6 +81,7 @@ public class InventoryController {
     }
 
     @GetMapping("/variants")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<Page<VariantInventoryDTO>> getVariantInventory(
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) StockStatus status,
@@ -102,6 +108,7 @@ public class InventoryController {
     }
 
     @PutMapping("/variants/{variantId}/stock")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_UPDATE + "')")
     public ApiResponse<VariantInventoryDTO> updateStock(
             @PathVariable Long variantId,
             @Valid @RequestBody UpdateStockRequest request) {
@@ -115,6 +122,7 @@ public class InventoryController {
     }
 
     @PutMapping("/variants/bulk-stock")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_UPDATE + "')")
     public ApiResponse<List<VariantInventoryDTO>> bulkUpdateStock(
             @Valid @RequestBody BulkUpdateStockRequest request) {
         List<VariantInventoryDTO> updatedVariants = inventoryService.bulkUpdateStock(request);
@@ -127,6 +135,7 @@ public class InventoryController {
     }
 
     @GetMapping("/variants/{variantId}/availability")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<StockAvailabilityDTO> checkStockAvailability(
             @PathVariable Long variantId,
             @RequestParam Integer quantity) {
@@ -140,6 +149,7 @@ public class InventoryController {
     }
 
     @GetMapping("/variants/{variantId}/available-stock")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<Integer> getAvailableStock(
             @PathVariable Long variantId) {
         Integer availableStock = inventoryService.getAvailableStock(variantId);
@@ -152,6 +162,7 @@ public class InventoryController {
     }
 
     @GetMapping("/low-stock")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<List<VariantInventoryDTO>> getLowStockVariants(
             @RequestParam(required = false, defaultValue = "10") Integer threshold) {
         List<VariantInventoryDTO> lowStockVariants = inventoryService.getLowStockVariants(threshold);
@@ -164,6 +175,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products/low-stock")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.INVENTORY_VIEW + "')")
     public ApiResponse<List<ProductInventoryDTO>> getProductsWithLowStock(
             @RequestParam(required = false, defaultValue = "10") Integer threshold) {
         List<ProductInventoryDTO> productsWithLowStock = inventoryService.getProductsWithLowStock(threshold);

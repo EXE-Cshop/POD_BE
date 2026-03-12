@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 @RestController
 @RequestMapping("/api/v1/product-variants")
@@ -24,6 +26,7 @@ public class ProductVariantController {
 
         @Operation(summary = "Get list of product variants", description = "Retrieve a paginated list of product variants with optional filters. Use request body to pass filter parameters.")
         @GetMapping
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_VIEW + "')")
         public ApiResponse<Page<ProductVariantDTO>> getAll(@ModelAttribute ProductVariantFilterRequest filterRequest) {
                 return ApiResponse.<Page<ProductVariantDTO>>builder()
                                 .code(HttpStatus.OK.value())
@@ -34,6 +37,7 @@ public class ProductVariantController {
 
         @Operation(summary = "Get product variant by ID", description = "Retrieve a single product variant by its ID")
         @GetMapping("/{id}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_VIEW + "')")
         public ApiResponse<ProductVariantDTO> getById(@PathVariable Long id) {
                 return ApiResponse.<ProductVariantDTO>builder()
                                 .code(HttpStatus.OK.value())
@@ -44,6 +48,7 @@ public class ProductVariantController {
 
         @Operation(summary = "Create new product variant", description = "Create a new product variant for a base product")
         @PostMapping
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_CREATE + "')")
         public ApiResponse<ProductVariantDTO> create(@Valid @RequestBody ProductVariantCreateRequest request) {
                 return ApiResponse.<ProductVariantDTO>builder()
                                 .code(HttpStatus.CREATED.value())
@@ -54,6 +59,7 @@ public class ProductVariantController {
 
         @Operation(summary = "Update product variant", description = "Update an existing product variant. Supports partial updates - only provided fields will be updated")
         @PutMapping("/{id}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_UPDATE + "')")
         public ApiResponse<ProductVariantDTO> update(
                         @PathVariable Long id,
                         @Valid @RequestBody ProductVariantUpdateRequest request) {
@@ -66,6 +72,7 @@ public class ProductVariantController {
 
         @Operation(summary = "Delete product variant", description = "Soft delete a product variant by setting active = false")
         @DeleteMapping("/{id}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_DELETE + "')")
         public ApiResponse<Void> delete(@PathVariable Long id) {
                 productVariantService.delete(id);
                 return ApiResponse.<Void>builder()

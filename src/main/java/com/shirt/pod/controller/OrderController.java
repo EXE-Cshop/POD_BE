@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -24,6 +26,7 @@ public class OrderController {
 
     @Operation(summary = "Get list of orders", description = "Retrieve a paginated list of orders, optionally filtered by status")
     @GetMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.ORDER_VIEW + "')")
     public ApiResponse<Page<OrderDTO>> getOrders(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(defaultValue = "1") int page,

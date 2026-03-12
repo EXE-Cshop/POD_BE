@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 import java.util.List;
 
@@ -70,6 +72,7 @@ public class ProductController {
 
         @Operation(summary = "Create product", description = "Create a new product")
         @PostMapping
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_CREATE + "')")
         public ApiResponse<ProductDTO> createProduct(
                         @Valid @RequestBody CreateProductRequest request) {
                 ProductDTO product = productService.createProduct(request);
@@ -83,6 +86,7 @@ public class ProductController {
 
         @Operation(summary = "Update product", description = "Update an existing product")
         @PutMapping("/{id}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<ProductDTO> updateProduct(
                         @PathVariable Long id,
                         @Valid @RequestBody UpdateProductRequest request) {
@@ -97,6 +101,7 @@ public class ProductController {
 
         @Operation(summary = "Delete product", description = "Soft delete a product")
         @DeleteMapping("/{id}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_DELETE + "')")
         public ApiResponse<Void> deleteProduct(
                         @PathVariable Long id) {
                 productService.deleteProduct(id);
@@ -109,6 +114,7 @@ public class ProductController {
 
         @Operation(summary = "Activate product", description = "Activate a product")
         @PatchMapping("/{id}/activate")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<Void> activateProduct(
                         @PathVariable Long id) {
                 productService.activateProduct(id);
@@ -121,6 +127,7 @@ public class ProductController {
 
         @Operation(summary = "Deactivate product", description = "Deactivate a product")
         @PatchMapping("/{id}/deactivate")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<Void> deactivateProduct(
                         @PathVariable Long id) {
                 productService.deactivateProduct(id);
@@ -146,6 +153,7 @@ public class ProductController {
 
         @Operation(summary = "Create product variant", description = "Create a new variant for a product")
         @PostMapping("/{productId}/variants")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_CREATE + "')")
         public ApiResponse<ProductVariantDTO> createVariant(
                         @PathVariable Long productId,
                         @Valid @RequestBody CreateProductVariantRequest request) {
@@ -160,6 +168,7 @@ public class ProductController {
 
         @Operation(summary = "Update product variant", description = "Update an existing product variant")
         @PutMapping("/variants/{variantId}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_UPDATE + "')")
         public ApiResponse<ProductVariantDTO> updateVariant(
                         @PathVariable Long variantId,
                         @Valid @RequestBody UpdateProductVariantRequest request) {
@@ -174,6 +183,7 @@ public class ProductController {
 
         @Operation(summary = "Delete product variant", description = "Soft delete a product variant")
         @DeleteMapping("/variants/{variantId}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_DELETE + "')")
         public ApiResponse<Void> deleteVariant(
                         @PathVariable Long variantId) {
                 productService.deleteVariant(variantId);
@@ -199,6 +209,7 @@ public class ProductController {
 
         @Operation(summary = "Create print area", description = "Create a new print area for a product")
         @PostMapping("/{productId}/print-areas")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_CREATE + "')")
         public ApiResponse<PrintAreaDTO> createPrintArea(
                         @PathVariable Long productId,
                         @Valid @RequestBody CreatePrintAreaRequest request) {
@@ -213,6 +224,7 @@ public class ProductController {
 
         @Operation(summary = "Update print area", description = "Update an existing print area")
         @PutMapping("/print-areas/{printAreaId}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_UPDATE + "')")
         public ApiResponse<PrintAreaDTO> updatePrintArea(
                         @PathVariable Long printAreaId,
                         @Valid @RequestBody UpdatePrintAreaRequest request) {
@@ -227,6 +239,7 @@ public class ProductController {
 
         @Operation(summary = "Delete print area", description = "Soft delete a print area")
         @DeleteMapping("/print-areas/{printAreaId}")
+        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_DELETE + "')")
         public ApiResponse<Void> deletePrintArea(
                         @PathVariable Long printAreaId) {
                 productService.deletePrintArea(printAreaId);

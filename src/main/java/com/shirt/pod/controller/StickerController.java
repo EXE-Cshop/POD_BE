@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class StickerController {
 
     @Operation(summary = "Get all stickers")
     @GetMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_VIEW + "')")
     public ApiResponse<List<StickerDTO>> getAll() {
         return ApiResponse.<List<StickerDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -36,6 +39,7 @@ public class StickerController {
 
     @Operation(summary = "Get sticker by ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_VIEW + "')")
     public ApiResponse<StickerDTO> getById(@PathVariable Long id) {
         return ApiResponse.<StickerDTO>builder()
                 .code(HttpStatus.OK.value())
@@ -46,6 +50,7 @@ public class StickerController {
 
     @Operation(summary = "Upload sticker image")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_CREATE + "')")
     public ApiResponse<StickerDTO> upload(@RequestParam("file") MultipartFile file) {
         return ApiResponse.<StickerDTO>builder()
                 .code(HttpStatus.CREATED.value())
@@ -56,6 +61,7 @@ public class StickerController {
 
     @Operation(summary = "Create new sticker (by link - deprecated, prefer upload)")
     @PostMapping
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_CREATE + "')")
     public ApiResponse<StickerDTO> create(@Valid @RequestBody StickerCreateRequest request) {
         return ApiResponse.<StickerDTO>builder()
                 .code(HttpStatus.CREATED.value())
@@ -66,6 +72,7 @@ public class StickerController {
 
     @Operation(summary = "Update sticker")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_UPDATE + "')")
     public ApiResponse<StickerDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody StickerUpdateRequest request) {
@@ -78,6 +85,7 @@ public class StickerController {
 
     @Operation(summary = "Delete sticker")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_DELETE + "')")
     public ApiResponse<Void> delete(@PathVariable Long id) {
         stickerService.delete(id);
         return ApiResponse.<Void>builder()

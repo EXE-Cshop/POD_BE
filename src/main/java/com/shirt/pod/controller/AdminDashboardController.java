@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import com.shirt.pod.security.SecurityConstants;
 
 import java.time.Instant;
 
@@ -29,6 +31,7 @@ public class AdminDashboardController {
 
     @GetMapping("/stats")
     @Operation(summary = "Get Dashboard Statistics", description = "Lấy thống kê doanh thu và số lượng đơn hàng theo trạng thái")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.DASHBOARD_VIEW + "')")
     public ResponseEntity<ApiResponse<DashboardStatsDTO>> getDashboardStats() {
         log.info("GET /api/v1/admin/dashboard/stats - Fetching dashboard statistics");
 
@@ -47,6 +50,7 @@ public class AdminDashboardController {
 
     @GetMapping("/orders/{orderId}")
     @Operation(summary = "Get Order Detail", description = "Lấy chi tiết đơn hàng cùng với danh sách order items (Join bảng Order & OrderItem)")
+    @PreAuthorize("hasAuthority('" + SecurityConstants.ORDER_VIEW + "')")
     public ResponseEntity<ApiResponse<OrderDetailDTO>> getOrderDetail(@PathVariable Long orderId) {
         log.info("GET /api/v1/admin/dashboard/orders/{} - Fetching order detail", orderId);
 
