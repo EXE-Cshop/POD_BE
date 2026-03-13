@@ -64,6 +64,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/virtual-tryon/**").permitAll()
                         .requestMatchers("/api/v1/chatbot/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/base-products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/product-variants/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stickers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/design-products/public").permitAll()
                         .requestMatchers("/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()); //non test
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

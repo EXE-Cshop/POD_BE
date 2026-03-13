@@ -28,7 +28,6 @@ public class StickerController {
 
     @Operation(summary = "Get all stickers")
     @GetMapping
-    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_VIEW + "')")
     public ApiResponse<List<StickerDTO>> getAll() {
         return ApiResponse.<List<StickerDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -39,7 +38,6 @@ public class StickerController {
 
     @Operation(summary = "Get sticker by ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + SecurityConstants.STICKER_VIEW + "')")
     public ApiResponse<StickerDTO> getById(@PathVariable Long id) {
         return ApiResponse.<StickerDTO>builder()
                 .code(HttpStatus.OK.value())

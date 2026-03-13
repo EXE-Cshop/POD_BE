@@ -26,7 +26,6 @@ public class ProductVariantController {
 
         @Operation(summary = "Get list of product variants", description = "Retrieve a paginated list of product variants with optional filters. Use request body to pass filter parameters.")
         @GetMapping
-        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_VIEW + "')")
         public ApiResponse<Page<ProductVariantDTO>> getAll(@ModelAttribute ProductVariantFilterRequest filterRequest) {
                 return ApiResponse.<Page<ProductVariantDTO>>builder()
                                 .code(HttpStatus.OK.value())
@@ -37,7 +36,6 @@ public class ProductVariantController {
 
         @Operation(summary = "Get product variant by ID", description = "Retrieve a single product variant by its ID")
         @GetMapping("/{id}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_VIEW + "')")
         public ApiResponse<ProductVariantDTO> getById(@PathVariable Long id) {
                 return ApiResponse.<ProductVariantDTO>builder()
                                 .code(HttpStatus.OK.value())

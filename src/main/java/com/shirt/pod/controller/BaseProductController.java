@@ -26,7 +26,6 @@ public class BaseProductController {
 
     @Operation(summary = "Get list of base products", description = "Retrieve a paginated list of base products with optional filters. Use request body to pass filter parameters.")
     @GetMapping
-    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_VIEW + "')")
     public ApiResponse<Page<BaseProductDTO>> getAll(@ModelAttribute BaseProductFilterRequest filterRequest) {
         return ApiResponse.<Page<BaseProductDTO>>builder()
                 .code(HttpStatus.OK.value())
@@ -37,7 +36,6 @@ public class BaseProductController {
 
     @Operation(summary = "Get base product by ID", description = "Retrieve a single base product by its ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + SecurityConstants.BASE_PRODUCT_VIEW + "')")
     public ApiResponse<BaseProductDTO> getById(@PathVariable Long id) {
         return ApiResponse.<BaseProductDTO>builder()
                 .code(HttpStatus.OK.value())

@@ -54,7 +54,7 @@ public class DesignProductController {
 
     @Operation(summary = "Get design by ID")
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ApiResponse<DesignProductDTO> getById(@PathVariable Long id) {
         return ApiResponse.<DesignProductDTO>builder()
                 .code(HttpStatus.OK.value())

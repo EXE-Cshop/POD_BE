@@ -57,7 +57,7 @@ cloudinary:
 
 # Hugging Face Configuration (for Virtual Try-On)
 huggingface:
-  api-key: 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
+  api-key:
 
 # Gemini AI Configuration (for AI Chatbot)
 gemini:
