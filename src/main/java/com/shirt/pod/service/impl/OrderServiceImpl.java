@@ -4,17 +4,14 @@ import com.shirt.pod.exception.AppException;
 import com.shirt.pod.exception.ErrorCode;
 import com.shirt.pod.mapper.OrderItemMapper;
 import com.shirt.pod.mapper.OrderMapper;
-import com.shirt.pod.model.dto.request.RenderPrintRequest;
 import com.shirt.pod.model.dto.response.DashboardStatsDTO;
 import com.shirt.pod.model.dto.response.OrderDTO;
 import com.shirt.pod.model.dto.response.OrderDetailDTO;
 import com.shirt.pod.model.dto.response.OrderItemDTO;
-import com.shirt.pod.model.dto.response.RenderResponse;
 import com.shirt.pod.model.entity.Order;
 import com.shirt.pod.model.entity.enums.OrderStatus;
 import com.shirt.pod.repository.OrderRepository;
 import com.shirt.pod.service.OrderService;
-import com.shirt.pod.service.RenderEngineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,7 +33,6 @@ public class OrderServiceImpl implements OrderService {
         private final OrderRepository orderRepository;
         private final OrderMapper orderMapper;
         private final OrderItemMapper orderItemMapper;
-        private final RenderEngineService renderEngineService;
 
         @Override
         public Page<OrderDTO> getOrders(OrderStatus status, int page, int size, String sortBy, String order) {
