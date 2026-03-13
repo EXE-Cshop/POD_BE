@@ -1,6 +1,6 @@
 package com.shirt.pod.security;
 
-import com.shirt.pod.util.ResponseUtils;
+import com.shirt.pod.utils.ResponseUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

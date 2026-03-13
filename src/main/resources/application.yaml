@@ -61,7 +61,7 @@ huggingface:
 
 # Gemini AI Configuration (for AI Chatbot)
 gemini:
-  api-key:
+  api-key: AIzaSyCskV-BnvVQFKY4qasN_I8-FoHMMMBYmdQ
   model: gemini-2.5-flash
 
 open:

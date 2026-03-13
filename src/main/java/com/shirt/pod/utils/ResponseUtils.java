@@ -1,4 +1,4 @@
-package com.shirt.pod.util;
+package com.shirt.pod.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shirt.pod.model.dto.response.ApiResponse;
