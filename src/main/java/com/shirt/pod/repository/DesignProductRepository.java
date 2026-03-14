@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface DesignProductRepository extends JpaRepository<DesignProduct, Long> {
 
+    org.springframework.data.domain.Page<DesignProduct> findByIsPublicTrue(org.springframework.data.domain.Pageable pageable);
+
     List<DesignProduct> findByIsPublicTrueOrderByCreatedDateDesc();
 
     List<DesignProduct> findByUserIdOrderByCreatedDateDesc(Long userId);

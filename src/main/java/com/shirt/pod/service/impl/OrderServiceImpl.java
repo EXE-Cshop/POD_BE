@@ -53,6 +53,25 @@ public class OrderServiceImpl implements OrderService {
 
                 return orderPage.map(orderMapper::toDTO);
         }
+ 
+        @Override
+        public Page<OrderDTO> getMyOrders(Long userId, int page, int size, String sortBy, String order) {
+                Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+                Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size,
+                                Sort.by(direction, sortBy));
+                log.info("Fetching orders for userId: {}, pageable: {}", userId, pageable);
+ 
+                Page<Order> orderPage = orderRepository.findByUserId(userId, pageable);
+ 
+                log.info("Found {} orders for userId: {} (page {}/{}, size {})",
+                                orderPage.getTotalElements(),
+                                userId,
+                                orderPage.getNumber(),
+                                orderPage.getTotalPages(),
+                                orderPage.getSize());
+ 
+                return orderPage.map(orderMapper::toDTO);
+        }
 
         @Override
         @Transactional(readOnly = true)

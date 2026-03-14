@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 public interface OrderService {
 
     Page<OrderDTO> getOrders(OrderStatus status, int page, int size, String sortBy, String order);
-
+ 
+    Page<OrderDTO> getMyOrders(Long userId, int page, int size, String sortBy, String order);
+ 
     DashboardStatsDTO getDashboardStats();
 
     OrderDetailDTO getOrderDetail(Long orderId);

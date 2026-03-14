@@ -10,6 +10,8 @@ public interface DesignProductService {
 
     List<DesignProductDTO> getPublicDesigns();
 
+    org.springframework.data.domain.Page<DesignProductDTO> getPublicFeed(org.springframework.data.domain.Pageable pageable);
+
     List<DesignProductDTO> getMyDesigns(Long userId);
 
     DesignProductDTO getById(Long id);

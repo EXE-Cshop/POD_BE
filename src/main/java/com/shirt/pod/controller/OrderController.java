@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.shirt.pod.security.SecurityConstants;
+import com.shirt.pod.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.data.domain.Page;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -40,6 +43,23 @@ public class OrderController {
                 .code(HttpStatus.OK.value())
                 .message("Orders fetched successfully")
                 .data(orderService.getOrders(status, page, size, sortBy, order))
+                .build();
+    }
+ 
+    @Operation(summary = "Get list of my orders", description = "Retrieve a paginated list of orders for the authenticated user")
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Page<OrderDTO>> getMyOrders(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String order) {
+ 
+        return ApiResponse.<Page<OrderDTO>>builder()
+                .code(HttpStatus.OK.value())
+                .message("My orders fetched successfully")
+                .data(orderService.getMyOrders(userDetails.getId(), page, size, sortBy, order))
                 .build();
     }
 }

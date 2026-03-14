@@ -26,6 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,13 @@ public class DesignProductServiceImpl implements DesignProductService {
     private final BaseProductRepository baseProductRepository;
     private final RenderEngineService renderEngineService;
     private final UploadService uploadService;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DesignProductDTO> getPublicFeed(Pageable pageable) {
+        return designProductRepository.findByIsPublicTrue(pageable)
+                .map(this::toDTOWithDesign);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -105,7 +115,8 @@ public class DesignProductServiceImpl implements DesignProductService {
                 String garmentUrl = request.getGarmentImageUrl();
                 if (garmentUrl == null || garmentUrl.isBlank()) {
                     String color = String.valueOf(designData.getOrDefault("garmentColor", "white"));
-                    garmentUrl = (color != null && color.toLowerCase().contains("black")) ? GARMENT_BLACK : GARMENT_WHITE;
+                    garmentUrl = (color != null && color.toLowerCase().contains("black")) ? GARMENT_BLACK
+                            : GARMENT_WHITE;
                 }
                 RenderPrintRequest renderReq = RenderPrintRequest.builder()
                         .widthMm(PRINT_WIDTH_MM)
@@ -157,12 +168,15 @@ public class DesignProductServiceImpl implements DesignProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Design not found with id: " + id));
         ensureOwner(dp, userId);
 
-        if (request.getName() != null) dp.setName(request.getName());
-        if (request.getIsPublic() != null) dp.setIsPublic(request.getIsPublic());
+        if (request.getName() != null)
+            dp.setName(request.getName());
+        if (request.getIsPublic() != null)
+            dp.setIsPublic(request.getIsPublic());
 
         Map<String, Object> designData = null;
         if (request.getDesignJsonData() != null && !request.getDesignJsonData().isEmpty()) {
-            log.info("Update design id={}: designJsonData provided, will save to MongoDB and run render for preview", id);
+            log.info("Update design id={}: designJsonData provided, will save to MongoDB and run render for preview",
+                    id);
             DesignJsonDocument doc = DesignJsonDocument.builder()
                     .data(request.getDesignJsonData())
                     .build();
@@ -171,7 +185,8 @@ public class DesignProductServiceImpl implements DesignProductService {
             dp.setDesignJsonRef(doc.getId());
             designData = request.getDesignJsonData();
             try {
-                if (oldRef != null && !oldRef.equals(doc.getId())) designJsonRepository.deleteById(oldRef);
+                if (oldRef != null && !oldRef.equals(doc.getId()))
+                    designJsonRepository.deleteById(oldRef);
             } catch (Exception e) {
                 log.warn("Could not delete old design doc {}: {}", oldRef, e.getMessage());
             }
@@ -188,7 +203,8 @@ public class DesignProductServiceImpl implements DesignProductService {
                     String garmentUrl = request.getGarmentImageUrl();
                     if (garmentUrl == null || garmentUrl.isBlank()) {
                         String color = String.valueOf(designData.getOrDefault("garmentColor", "white"));
-                        garmentUrl = (color != null && color.toLowerCase().contains("black")) ? GARMENT_BLACK : GARMENT_WHITE;
+                        garmentUrl = (color != null && color.toLowerCase().contains("black")) ? GARMENT_BLACK
+                                : GARMENT_WHITE;
                     }
                     RenderPrintRequest renderReq = RenderPrintRequest.builder()
                             .widthMm(PRINT_WIDTH_MM)
@@ -220,7 +236,8 @@ public class DesignProductServiceImpl implements DesignProductService {
                 dp.setPreviewImageUrl(previewUrl);
                 log.info("Update design id={}: preview URL updated (Cloudinary)", id);
             } else if (previewUrl != null) {
-                log.warn("Update design id={}: previewUrl is local path, not usable for frontend - keeping old preview", id);
+                log.warn("Update design id={}: previewUrl is local path, not usable for frontend - keeping old preview",
+                        id);
             } else {
                 log.warn("Update design id={}: previewUrl is null, keeping old preview (if any)", id);
             }
@@ -269,7 +286,8 @@ public class DesignProductServiceImpl implements DesignProductService {
 
     private void ensureOwner(DesignProduct dp, Long userId) {
         if (dp.getUser() == null) {
-            if (userId != null) throw new AppException(ErrorCode.RESOURCE_FORBIDDEN);
+            if (userId != null)
+                throw new AppException(ErrorCode.RESOURCE_FORBIDDEN);
             return;
         }
         if (userId == null || !dp.getUser().getId().equals(userId)) {
@@ -283,7 +301,8 @@ public class DesignProductServiceImpl implements DesignProductService {
     }
 
     private Map<String, Object> fetchDesignFromMongo(String ref) {
-        if (ref == null || ref.isBlank()) return null;
+        if (ref == null || ref.isBlank())
+            return null;
         return designJsonRepository.findById(ref)
                 .map(DesignJsonDocument::getData)
                 .orElse(null);

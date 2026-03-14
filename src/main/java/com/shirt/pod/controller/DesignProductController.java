@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,104 +29,113 @@ import java.util.List;
 @Slf4j
 public class DesignProductController {
 
-    private final DesignProductService designProductService;
+        private final DesignProductService designProductService;
 
-    @Operation(summary = "Get all public designs (community gallery)")
-    @GetMapping("/public")
-    @PreAuthorize("permitAll()")
-    public ApiResponse<List<DesignProductDTO>> getPublicDesigns() {
-        return ApiResponse.<List<DesignProductDTO>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Public designs fetched successfully")
-                .data(designProductService.getPublicDesigns())
-                .build();
-    }
+        @Operation(summary = "Get all public designs (community gallery)")
+        @GetMapping("/public")
+        @PreAuthorize("permitAll()")
+        public ApiResponse<List<DesignProductDTO>> getPublicDesigns() {
+                return ApiResponse.<List<DesignProductDTO>>builder()
+                                .data(designProductService.getPublicDesigns())
+                                .build();
+        }
 
-    @Operation(summary = "Get my saved designs")
-    @GetMapping("/my")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<DesignProductDTO>> getMyDesigns(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        return ApiResponse.<List<DesignProductDTO>>builder()
-                .code(HttpStatus.OK.value())
-                .message("My designs fetched successfully")
-                .data(designProductService.getMyDesigns(userId))
-                .build();
-    }
+        @GetMapping("/feed")
+        @PreAuthorize("permitAll()")
+        public ApiResponse<Page<DesignProductDTO>> getPublicFeed(
+                        @PageableDefault(size = 12, sort = "createdDate", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+                return ApiResponse.<Page<DesignProductDTO>>builder()
+                                .data(designProductService.getPublicFeed(pageable))
+                                .build();
+        }
 
-    @Operation(summary = "Get design by ID")
-    @GetMapping("/{id}")
-    @PreAuthorize("permitAll()")
-    public ApiResponse<DesignProductDTO> getById(@PathVariable Long id) {
-        return ApiResponse.<DesignProductDTO>builder()
-                .code(HttpStatus.OK.value())
-                .message("Design fetched successfully")
-                .data(designProductService.getById(id))
-                .build();
-    }
+        @Operation(summary = "Get my saved designs")
+        @GetMapping("/my")
+        @PreAuthorize("isAuthenticated()")
+        public ApiResponse<List<DesignProductDTO>> getMyDesigns(
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                Long userId = userDetails != null ? userDetails.getId() : null;
+                return ApiResponse.<List<DesignProductDTO>>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("My designs fetched successfully")
+                                .data(designProductService.getMyDesigns(userId))
+                                .build();
+        }
 
-    @Operation(summary = "Save new design")
-    @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<DesignProductDTO>> create(
-            @Valid @RequestBody DesignProductCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info("DesignProduct create request: name={}, baseProductId={}, isPublic={}", request.getName(), request.getBaseProductId(), request.getIsPublic());
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        DesignProductDTO dto = designProductService.create(request, userId);
-        log.info("DesignProduct created: id={}", dto.getId());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.<DesignProductDTO>builder()
-                        .code(HttpStatus.CREATED.value())
-                        .message("Design saved successfully")
-                        .data(dto)
-                        .build());
-    }
+        @Operation(summary = "Get design by ID")
+        @GetMapping("/{id}")
+        @PreAuthorize("permitAll()")
+        public ApiResponse<DesignProductDTO> getById(@PathVariable Long id) {
+                return ApiResponse.<DesignProductDTO>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Design fetched successfully")
+                                .data(designProductService.getById(id))
+                                .build();
+        }
 
-    @Operation(summary = "Update design (name, isPublic, designJsonData)")
-    @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<DesignProductDTO> update(
-            @PathVariable Long id,
-            @Valid @RequestBody DesignProductUpdateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        boolean hasDesignData = request.getDesignJsonData() != null && !request.getDesignJsonData().isEmpty();
-        log.info("DesignProduct update id={} name={} hasDesignJsonData={} (will trigger render)", id, request.getName(), hasDesignData);
-        return ApiResponse.<DesignProductDTO>builder()
-                .code(HttpStatus.OK.value())
-                .message("Design updated successfully")
-                .data(designProductService.update(id, request, userId))
-                .build();
-    }
+        @Operation(summary = "Save new design")
+        @PostMapping
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<ApiResponse<DesignProductDTO>> create(
+                        @Valid @RequestBody DesignProductCreateRequest request,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                log.info("DesignProduct create request: name={}, baseProductId={}, isPublic={}", request.getName(),
+                                request.getBaseProductId(), request.getIsPublic());
+                Long userId = userDetails != null ? userDetails.getId() : null;
+                DesignProductDTO dto = designProductService.create(request, userId);
+                log.info("DesignProduct created: id={}", dto.getId());
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ApiResponse.<DesignProductDTO>builder()
+                                                .code(HttpStatus.CREATED.value())
+                                                .message("Design saved successfully")
+                                                .data(dto)
+                                                .build());
+        }
 
-    @Operation(summary = "Toggle public/private")
-    @PatchMapping("/{id}/public")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<DesignProductDTO> setPublic(
-            @PathVariable Long id,
-            @RequestParam boolean value,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        return ApiResponse.<DesignProductDTO>builder()
-                .code(HttpStatus.OK.value())
-                .message("Design visibility updated")
-                .data(designProductService.setPublic(id, value, userId))
-                .build();
-    }
+        @Operation(summary = "Update design (name, isPublic, designJsonData)")
+        @PutMapping("/{id}")
+        @PreAuthorize("isAuthenticated()")
+        public ApiResponse<DesignProductDTO> update(
+                        @PathVariable Long id,
+                        @Valid @RequestBody DesignProductUpdateRequest request,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                Long userId = userDetails != null ? userDetails.getId() : null;
+                boolean hasDesignData = request.getDesignJsonData() != null && !request.getDesignJsonData().isEmpty();
+                log.info("DesignProduct update id={} name={} hasDesignJsonData={} (will trigger render)", id,
+                                request.getName(), hasDesignData);
+                return ApiResponse.<DesignProductDTO>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Design updated successfully")
+                                .data(designProductService.update(id, request, userId))
+                                .build();
+        }
 
-    @Operation(summary = "Delete design")
-    @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Void> delete(
-            @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails != null ? userDetails.getId() : null;
-        designProductService.delete(id, userId);
-        return ApiResponse.<Void>builder()
-                .code(HttpStatus.OK.value())
-                .message("Design deleted successfully")
-                .build();
-    }
+        @Operation(summary = "Toggle public/private")
+        @PatchMapping("/{id}/public")
+        @PreAuthorize("isAuthenticated()")
+        public ApiResponse<DesignProductDTO> setPublic(
+                        @PathVariable Long id,
+                        @RequestParam boolean value,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                Long userId = userDetails != null ? userDetails.getId() : null;
+                return ApiResponse.<DesignProductDTO>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Design visibility updated")
+                                .data(designProductService.setPublic(id, value, userId))
+                                .build();
+        }
+
+        @Operation(summary = "Delete design")
+        @DeleteMapping("/{id}")
+        @PreAuthorize("isAuthenticated()")
+        public ApiResponse<Void> delete(
+                        @PathVariable Long id,
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                Long userId = userDetails != null ? userDetails.getId() : null;
+                designProductService.delete(id, userId);
+                return ApiResponse.<Void>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Design deleted successfully")
+                                .build();
+        }
 }
