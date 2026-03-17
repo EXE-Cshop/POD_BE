@@ -15,5 +15,13 @@ public class CreateGiftRequest {
 
     private String mediaUrl;
 
+    private String recipientName;
+
+    private String themeName;
+
+    private String photoUrl;
+
+    private String videoUrl;
+
     private String messageText;
 }

@@ -36,6 +36,14 @@ public class GiftMessage {
 
     private String mediaUrl;
 
+    private String recipientName;
+
+    private String themeName;
+
+    private String photoUrl;
+
+    private String videoUrl;
+
     @Column(columnDefinition = "TEXT")
     private String messageText;
 

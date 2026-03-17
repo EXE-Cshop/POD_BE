@@ -42,6 +42,10 @@ public class GiftMessageService {
                     log.info("Updating existing gift message uuid={} for orderId={}", existingGift.getUuid(), request.getOrderId());
                     existingGift.setMediaUrl(request.getMediaUrl());
                     existingGift.setMessageText(request.getMessageText());
+                    existingGift.setRecipientName(request.getRecipientName());
+                    existingGift.setThemeName(request.getThemeName());
+                    existingGift.setPhotoUrl(request.getPhotoUrl());
+                    existingGift.setVideoUrl(request.getVideoUrl());
                     return giftMessageRepository.save(existingGift);
                 })
                 .orElseGet(() -> {
@@ -50,6 +54,10 @@ public class GiftMessageService {
                             .uuid(UUID.randomUUID().toString())
                             .mediaUrl(request.getMediaUrl())
                             .messageText(request.getMessageText())
+                            .recipientName(request.getRecipientName())
+                            .themeName(request.getThemeName())
+                            .photoUrl(request.getPhotoUrl())
+                            .videoUrl(request.getVideoUrl())
                             .build();
 
                     GiftMessage saved = giftMessageRepository.save(gift);
