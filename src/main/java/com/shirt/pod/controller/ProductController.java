@@ -1,19 +1,20 @@
 package com.shirt.pod.controller;
 
-import com.shirt.pod.model.dto.request.CreatePrintAreaRequest;
 import com.shirt.pod.model.dto.request.CreateProductRequest;
 import com.shirt.pod.model.dto.request.CreateProductVariantRequest;
-import com.shirt.pod.model.dto.request.UpdatePrintAreaRequest;
 import com.shirt.pod.model.dto.request.UpdateProductRequest;
 import com.shirt.pod.model.dto.request.UpdateProductVariantRequest;
 import com.shirt.pod.model.dto.response.ApiResponse;
-import com.shirt.pod.model.dto.response.PrintAreaDTO;
 import com.shirt.pod.model.dto.response.ProductDetailDTO;
 import com.shirt.pod.model.dto.response.ProductDTO;
 import com.shirt.pod.model.dto.response.ProductVariantDTO;
 import com.shirt.pod.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,8 +32,31 @@ public class ProductController {
 
         private final ProductService productService;
 
-        @Operation(summary = "Get all products", description = "Retrieve a list of products, optionally filtered by active status")
+        @Operation(summary = "Get products with pagination, search, and category filter")
         @GetMapping
+        public ApiResponse<Page<ProductDTO>> getProducts(
+                        @RequestParam(required = false) Long categoryId,
+                        @RequestParam(required = false) String keyword,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "12") int size,
+                        @RequestParam(defaultValue = "id,desc") String sort) {
+                
+                String[] sortParams = sort.split(",");
+                Sort.Direction dir = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+                String property = sortParams[0];
+                Pageable pageable = PageRequest.of(page, size, Sort.by(dir, property));
+                
+                Page<ProductDTO> products = productService.getProducts(categoryId, keyword, pageable);
+
+                return ApiResponse.<Page<ProductDTO>>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Get products successfully")
+                                .data(products)
+                                .build();
+        }
+
+        @Operation(summary = "Get all products (list, optional filter by active status)")
+        @GetMapping("/all")
         public ApiResponse<List<ProductDTO>> getAllProducts(
                         @RequestParam(required = false) Boolean activeOnly) {
                 List<ProductDTO> products = productService.getAllProducts(activeOnly);
@@ -57,7 +81,7 @@ public class ProductController {
                                 .build();
         }
 
-        @Operation(summary = "Get product detail", description = "Retrieve full product details including variants and print areas")
+        @Operation(summary = "Get product detail by ID", description = "Retrieve full product details including variants and images")
         @GetMapping("/{id}/detail")
         public ApiResponse<ProductDetailDTO> getProductDetail(
                         @PathVariable Long id) {
@@ -70,9 +94,44 @@ public class ProductController {
                                 .build();
         }
 
+        @Operation(summary = "Get product detail by slug", description = "Retrieve full product details by its SEO-friendly slug")
+        @GetMapping("/slug/{slug}")
+        public ApiResponse<ProductDetailDTO> getProductDetailBySlug(
+                        @PathVariable String slug) {
+                ProductDetailDTO productDetail = productService.getProductDetailBySlug(slug);
+
+                return ApiResponse.<ProductDetailDTO>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Get product detail by slug successfully")
+                                .data(productDetail)
+                                .build();
+        }
+
+        @Operation(summary = "Get trending products")
+        @GetMapping("/trending")
+        public ApiResponse<List<ProductDTO>> getTrendingProducts() {
+                List<ProductDTO> products = productService.getTrendingProducts();
+                return ApiResponse.<List<ProductDTO>>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Get trending products successfully")
+                                .data(products)
+                                .build();
+        }
+
+        @Operation(summary = "Get featured products")
+        @GetMapping("/featured")
+        public ApiResponse<List<ProductDTO>> getFeaturedProducts() {
+                List<ProductDTO> products = productService.getFeaturedProducts();
+                return ApiResponse.<List<ProductDTO>>builder()
+                                .code(HttpStatus.OK.value())
+                                .message("Get featured products successfully")
+                                .data(products)
+                                .build();
+        }
+
         @Operation(summary = "Create product", description = "Create a new product")
         @PostMapping
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_CREATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.PRODUCT_CREATE + "')")
         public ApiResponse<ProductDTO> createProduct(
                         @Valid @RequestBody CreateProductRequest request) {
                 ProductDTO product = productService.createProduct(request);
@@ -86,7 +145,7 @@ public class ProductController {
 
         @Operation(summary = "Update product", description = "Update an existing product")
         @PutMapping("/{id}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<ProductDTO> updateProduct(
                         @PathVariable Long id,
                         @Valid @RequestBody UpdateProductRequest request) {
@@ -101,7 +160,7 @@ public class ProductController {
 
         @Operation(summary = "Delete product", description = "Soft delete a product")
         @DeleteMapping("/{id}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_DELETE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.PRODUCT_DELETE + "')")
         public ApiResponse<Void> deleteProduct(
                         @PathVariable Long id) {
                 productService.deleteProduct(id);
@@ -114,7 +173,7 @@ public class ProductController {
 
         @Operation(summary = "Activate product", description = "Activate a product")
         @PatchMapping("/{id}/activate")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<Void> activateProduct(
                         @PathVariable Long id) {
                 productService.activateProduct(id);
@@ -127,7 +186,7 @@ public class ProductController {
 
         @Operation(summary = "Deactivate product", description = "Deactivate a product")
         @PatchMapping("/{id}/deactivate")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.PRODUCT_UPDATE + "')")
         public ApiResponse<Void> deactivateProduct(
                         @PathVariable Long id) {
                 productService.deactivateProduct(id);
@@ -153,7 +212,7 @@ public class ProductController {
 
         @Operation(summary = "Create product variant", description = "Create a new variant for a product")
         @PostMapping("/{productId}/variants")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_CREATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.VARIANT_CREATE + "')")
         public ApiResponse<ProductVariantDTO> createVariant(
                         @PathVariable Long productId,
                         @Valid @RequestBody CreateProductVariantRequest request) {
@@ -168,7 +227,7 @@ public class ProductController {
 
         @Operation(summary = "Update product variant", description = "Update an existing product variant")
         @PutMapping("/variants/{variantId}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_UPDATE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.VARIANT_UPDATE + "')")
         public ApiResponse<ProductVariantDTO> updateVariant(
                         @PathVariable Long variantId,
                         @Valid @RequestBody UpdateProductVariantRequest request) {
@@ -183,7 +242,7 @@ public class ProductController {
 
         @Operation(summary = "Delete product variant", description = "Soft delete a product variant")
         @DeleteMapping("/variants/{variantId}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.VARIANT_DELETE + "')")
+        @PreAuthorize("hasRole('ADMIN') or hasAuthority('" + SecurityConstants.VARIANT_DELETE + "')")
         public ApiResponse<Void> deleteVariant(
                         @PathVariable Long variantId) {
                 productService.deleteVariant(variantId);
@@ -191,62 +250,6 @@ public class ProductController {
                 return ApiResponse.<Void>builder()
                                 .code(HttpStatus.OK.value())
                                 .message("Product variant deleted successfully")
-                                .build();
-        }
-
-        @Operation(summary = "Get product print areas", description = "Retrieve all print areas for a specific product")
-        @GetMapping("/{productId}/print-areas")
-        public ApiResponse<List<PrintAreaDTO>> getPrintAreasByProductId(
-                        @PathVariable Long productId) {
-                List<PrintAreaDTO> printAreas = productService.getPrintAreasByProductId(productId);
-
-                return ApiResponse.<List<PrintAreaDTO>>builder()
-                                .code(HttpStatus.OK.value())
-                                .message("Get product print areas successfully")
-                                .data(printAreas)
-                                .build();
-        }
-
-        @Operation(summary = "Create print area", description = "Create a new print area for a product")
-        @PostMapping("/{productId}/print-areas")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_CREATE + "')")
-        public ApiResponse<PrintAreaDTO> createPrintArea(
-                        @PathVariable Long productId,
-                        @Valid @RequestBody CreatePrintAreaRequest request) {
-                PrintAreaDTO printArea = productService.createPrintArea(productId, request);
-
-                return ApiResponse.<PrintAreaDTO>builder()
-                                .code(HttpStatus.CREATED.value())
-                                .message("Print area created successfully")
-                                .data(printArea)
-                                .build();
-        }
-
-        @Operation(summary = "Update print area", description = "Update an existing print area")
-        @PutMapping("/print-areas/{printAreaId}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_UPDATE + "')")
-        public ApiResponse<PrintAreaDTO> updatePrintArea(
-                        @PathVariable Long printAreaId,
-                        @Valid @RequestBody UpdatePrintAreaRequest request) {
-                PrintAreaDTO printArea = productService.updatePrintArea(printAreaId, request);
-
-                return ApiResponse.<PrintAreaDTO>builder()
-                                .code(HttpStatus.OK.value())
-                                .message("Print area updated successfully")
-                                .data(printArea)
-                                .build();
-        }
-
-        @Operation(summary = "Delete print area", description = "Soft delete a print area")
-        @DeleteMapping("/print-areas/{printAreaId}")
-        @PreAuthorize("hasAuthority('" + SecurityConstants.PRINT_AREA_DELETE + "')")
-        public ApiResponse<Void> deletePrintArea(
-                        @PathVariable Long printAreaId) {
-                productService.deletePrintArea(printAreaId);
-
-                return ApiResponse.<Void>builder()
-                                .code(HttpStatus.OK.value())
-                                .message("Print area deleted successfully")
                                 .build();
         }
 }

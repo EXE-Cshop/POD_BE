@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
-@RequestMapping("/api/checkout")
+@RequestMapping({"/api/v1/checkout", "/api/checkout"})
 @RequiredArgsConstructor
 @Tag(name = "Checkout", description = "Checkout APIs")
 @PreAuthorize("isAuthenticated()")

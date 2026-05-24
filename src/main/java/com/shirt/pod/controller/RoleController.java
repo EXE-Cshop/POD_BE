@@ -28,7 +28,7 @@ import static com.shirt.pod.security.SecurityConstants.ROLE_VIEW;
 
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
 @Tag(name = "Role", description = "APIs for managing roles and permissions")
 public class RoleController {

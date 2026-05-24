@@ -36,6 +36,7 @@ public class CustomUserDetails implements UserDetails {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
         roles.forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             role.getPermissions().forEach(permission ->
                     authorities.add(new SimpleGrantedAuthority(permission.getName()))
             );

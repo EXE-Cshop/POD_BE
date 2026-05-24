@@ -21,4 +21,5 @@ public class CheckoutRequest {
     private PaymentMethod paymentMethod;
 
     private String note;
+    private String promotionCode;
 }

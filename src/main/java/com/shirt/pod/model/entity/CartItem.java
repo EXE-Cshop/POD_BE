@@ -28,10 +28,6 @@ public class CartItem extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "custom_product_id")
-    private CustomProduct customProduct;
-
     public BigDecimal getSubtotal() {
         return price.multiply(BigDecimal.valueOf(quantity));
     }

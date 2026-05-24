@@ -1,6 +1,7 @@
 package com.shirt.pod.controller;
 
 import com.shirt.pod.model.dto.request.CreateUserRequest;
+import com.shirt.pod.model.dto.request.UpdateUserRequest;
 import com.shirt.pod.model.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,10 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +26,7 @@ import java.util.List;
 
 import static com.shirt.pod.security.SecurityConstants.USER_CREATE;
 import static com.shirt.pod.security.SecurityConstants.USER_DELETE;
+import static com.shirt.pod.security.SecurityConstants.USER_UPDATE;
 import static com.shirt.pod.security.SecurityConstants.USER_VIEW;
 
 @RestController
@@ -86,7 +90,7 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Create new user", description = "Create a new user account with basic information")
     @PreAuthorize("hasAuthority('" + USER_CREATE + "')")
-    public ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request) {
+    public ApiResponse<UserDTO> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserDTO user = userService.createUser(request);
 
         return ApiResponse.<UserDTO>builder()
@@ -96,15 +100,31 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user", description = "Update user profile, status and role assignment")
+    @PreAuthorize("hasAuthority('" + USER_UPDATE + "')")
+    public ApiResponse<UserDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserDTO user = userService.updateUser(id, request, userDetails.getId());
+
+        return ApiResponse.<UserDTO>builder()
+                .code(HttpStatus.OK.value())
+                .message("User updated successfully")
+                .data(user)
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user", description = "Delete a user from the system by ID. Only accessible by ADMIN role")
     @PreAuthorize("hasAuthority('" + USER_DELETE + "')")
-    public ApiResponse<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ApiResponse<Void> deleteUser(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUser(id, userDetails.getId());
 
         return ApiResponse.<Void>builder()
                 .code(HttpStatus.OK.value())
-                .message("User deleted successfully")
+                .message("User deactivated successfully")
                 .build();
     }
 }

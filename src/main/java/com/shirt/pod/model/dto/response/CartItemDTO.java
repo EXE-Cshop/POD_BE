@@ -22,7 +22,5 @@ public class CartItemDTO {
     private Integer quantity;
     private BigDecimal subtotal;
     private String imageUrl;
-    private Long customProductId;
-    private Boolean isCustomDesign;
     private List<String> availableSizes;
 }

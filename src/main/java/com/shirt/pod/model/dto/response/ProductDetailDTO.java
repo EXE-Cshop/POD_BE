@@ -21,16 +21,22 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ProductDetailDTO {
-
     Long id;
     String name;
+    String slug;
     String description;
     BigDecimal basePrice;
     String material;
+    String imageUrl;
     Boolean active;
+    Boolean isTrending;
+    Boolean isFeatured;
+    String tags;
+    CategoryDTO category;
     Instant createdDate;
     Instant modifiedDate;
 
     List<ProductVariantDTO> variants;
-    List<PrintAreaDTO> printAreas;
+    List<ProductImageDTO> images;
+    List<ReviewDTO> reviews;
 }

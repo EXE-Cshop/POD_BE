@@ -20,13 +20,17 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ProductDTO {
-
     Long id;
     String name;
+    String slug;
     String description;
     BigDecimal basePrice;
     String material;
+    String imageUrl;
     Boolean active;
+    Boolean isTrending;
+    Boolean isFeatured;
+    String tags;
     Instant createdDate;
     Instant modifiedDate;
 }

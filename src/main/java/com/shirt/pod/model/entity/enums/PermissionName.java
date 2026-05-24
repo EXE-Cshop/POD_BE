@@ -21,35 +21,17 @@ public enum PermissionName {
     // Permission Management
     PERMISSION_VIEW,
 
-    // Product Management (For general product flows if still needed, else we can keep them)
+    // Product Management
     PRODUCT_VIEW,
     PRODUCT_CREATE,
     PRODUCT_UPDATE,
     PRODUCT_DELETE,
-
-    // Base Product Management
-    BASE_PRODUCT_VIEW,
-    BASE_PRODUCT_CREATE,
-    BASE_PRODUCT_UPDATE,
-    BASE_PRODUCT_DELETE,
 
     // Product Variant Management
     VARIANT_VIEW,
     VARIANT_CREATE,
     VARIANT_UPDATE,
     VARIANT_DELETE,
-
-    // Print Area Management
-    PRINT_AREA_VIEW,
-    PRINT_AREA_CREATE,
-    PRINT_AREA_UPDATE,
-    PRINT_AREA_DELETE,
-
-    // Sticker Management
-    STICKER_VIEW,
-    STICKER_CREATE,
-    STICKER_UPDATE,
-    STICKER_DELETE,
 
     // Inventory Management
     INVENTORY_VIEW,
@@ -65,9 +47,21 @@ public enum PermissionName {
     ORDER_DELETE,
     ORDER_APPROVE,
 
-    // Design Management
-    DESIGN_VIEW,
-    DESIGN_CREATE,
-    DESIGN_UPDATE,
-    DESIGN_DELETE
+    // Category Management
+    CATEGORY_VIEW,
+    CATEGORY_CREATE,
+    CATEGORY_UPDATE,
+    CATEGORY_DELETE,
+
+    // Review Management
+    REVIEW_DELETE,
+
+    // Promotion Management
+    PROMOTION_VIEW,
+    PROMOTION_CREATE,
+    PROMOTION_UPDATE,
+    PROMOTION_DELETE,
+
+    // Wishlist Management
+    WISHLIST_VIEW
 }

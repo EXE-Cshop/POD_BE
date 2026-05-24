@@ -36,6 +36,18 @@ public class CreateProductRequest {
     @Size(max = 100, message = "Material must not exceed 100 characters")
     String material;
 
+    Long categoryId;
+
+    String imageUrl;
+
+    @Builder.Default
+    Boolean isTrending = false;
+
+    @Builder.Default
+    Boolean isFeatured = false;
+
+    String tags;
+
     @Builder.Default
     Boolean active = true;
 }

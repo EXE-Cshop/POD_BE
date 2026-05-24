@@ -14,30 +14,16 @@ public final class SecurityConstants {
     public static final String ROLE_UPDATE = "ROLE_UPDATE";
     public static final String ROLE_DELETE = "ROLE_DELETE";
     public static final String PERMISSION_VIEW = "PERMISSION_VIEW";
+    
     public static final String PRODUCT_VIEW = "PRODUCT_VIEW";
     public static final String PRODUCT_CREATE = "PRODUCT_CREATE";
     public static final String PRODUCT_UPDATE = "PRODUCT_UPDATE";
     public static final String PRODUCT_DELETE = "PRODUCT_DELETE";
 
-    public static final String BASE_PRODUCT_VIEW = "BASE_PRODUCT_VIEW";
-    public static final String BASE_PRODUCT_CREATE = "BASE_PRODUCT_CREATE";
-    public static final String BASE_PRODUCT_UPDATE = "BASE_PRODUCT_UPDATE";
-    public static final String BASE_PRODUCT_DELETE = "BASE_PRODUCT_DELETE";
-
     public static final String VARIANT_VIEW = "VARIANT_VIEW";
     public static final String VARIANT_CREATE = "VARIANT_CREATE";
     public static final String VARIANT_UPDATE = "VARIANT_UPDATE";
     public static final String VARIANT_DELETE = "VARIANT_DELETE";
-
-    public static final String PRINT_AREA_VIEW = "PRINT_AREA_VIEW";
-    public static final String PRINT_AREA_CREATE = "PRINT_AREA_CREATE";
-    public static final String PRINT_AREA_UPDATE = "PRINT_AREA_UPDATE";
-    public static final String PRINT_AREA_DELETE = "PRINT_AREA_DELETE";
-
-    public static final String STICKER_VIEW = "STICKER_VIEW";
-    public static final String STICKER_CREATE = "STICKER_CREATE";
-    public static final String STICKER_UPDATE = "STICKER_UPDATE";
-    public static final String STICKER_DELETE = "STICKER_DELETE";
 
     public static final String INVENTORY_VIEW = "INVENTORY_VIEW";
     public static final String INVENTORY_UPDATE = "INVENTORY_UPDATE";
@@ -49,9 +35,18 @@ public final class SecurityConstants {
     public static final String ORDER_UPDATE = "ORDER_UPDATE";
     public static final String ORDER_DELETE = "ORDER_DELETE";
     public static final String ORDER_APPROVE = "ORDER_APPROVE";
-    public static final String DESIGN_VIEW = "DESIGN_VIEW";
-    public static final String DESIGN_CREATE = "DESIGN_CREATE";
-    public static final String DESIGN_UPDATE = "DESIGN_UPDATE";
-    public static final String DESIGN_DELETE = "DESIGN_DELETE";
 
+    public static final String CATEGORY_VIEW = "CATEGORY_VIEW";
+    public static final String CATEGORY_CREATE = "CATEGORY_CREATE";
+    public static final String CATEGORY_UPDATE = "CATEGORY_UPDATE";
+    public static final String CATEGORY_DELETE = "CATEGORY_DELETE";
+
+    public static final String REVIEW_DELETE = "REVIEW_DELETE";
+
+    public static final String PROMOTION_VIEW = "PROMOTION_VIEW";
+    public static final String PROMOTION_CREATE = "PROMOTION_CREATE";
+    public static final String PROMOTION_UPDATE = "PROMOTION_UPDATE";
+    public static final String PROMOTION_DELETE = "PROMOTION_DELETE";
+
+    public static final String WISHLIST_VIEW = "WISHLIST_VIEW";
 }

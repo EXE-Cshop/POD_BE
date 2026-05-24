@@ -23,6 +23,8 @@ public class OrderDetailDTO {
     private String paymentMethod;
     private String paymentStatus;
     private String note;
+    private String promotionCode;
+    private BigDecimal discountAmount;
     private Long userId;
     private Instant createdDate;
     private List<OrderItemDTO> orderItems;

@@ -36,9 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
         @Override
         public Page<OrderDTO> getOrders(OrderStatus status, int page, int size, String sortBy, String order) {
-                Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
-                Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size,
-                                Sort.by(direction, sortBy));
+                Pageable pageable = buildPageable(page, size, sortBy, order);
                 log.info("Fetching orders with status: {}, pageable: {}", status, pageable);
 
                 Page<Order> orderPage = (status != null)
@@ -51,6 +49,15 @@ public class OrderServiceImpl implements OrderService {
                                 orderPage.getTotalPages(),
                                 orderPage.getSize());
 
+                return orderPage.map(orderMapper::toDTO);
+        }
+
+        @Override
+        public Page<OrderDTO> getOrdersForUser(Long userId, OrderStatus status, int page, int size, String sortBy, String order) {
+                Pageable pageable = buildPageable(page, size, sortBy, order);
+                Page<Order> orderPage = (status != null)
+                                ? orderRepository.findByUserIdAndStatus(userId, status, pageable)
+                                : orderRepository.findByUserId(userId, pageable);
                 return orderPage.map(orderMapper::toDTO);
         }
 
@@ -115,6 +122,37 @@ public class OrderServiceImpl implements OrderService {
                                 .paymentMethod(order.getPaymentMethod())
                                 .paymentStatus(order.getPaymentStatus())
                                 .note(order.getNote())
+                                .promotionCode(order.getPromotionCode())
+                                .discountAmount(order.getDiscountAmount())
+                                .userId(order.getUserId())
+                                .createdDate(order.getCreatedDate())
+                                .orderItems(orderItemDTOs)
+                                .build();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public OrderDetailDTO getOrderDetailForUser(Long userId, Long orderId) {
+                Order order = orderRepository.findByIdAndUserIdWithItems(orderId, userId)
+                                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "id", orderId.toString()));
+
+                List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
+                                .map(orderItemMapper::toDTO)
+                                .collect(Collectors.toList());
+
+                return OrderDetailDTO.builder()
+                                .id(order.getId())
+                                .status(order.getStatus())
+                                .totalAmount(order.getTotalAmount())
+                                .shippingFee(order.getShippingFee())
+                                .recipientName(order.getRecipientName())
+                                .recipientPhone(order.getRecipientPhone())
+                                .shippingAddress(order.getShippingAddress())
+                                .paymentMethod(order.getPaymentMethod())
+                                .paymentStatus(order.getPaymentStatus())
+                                .note(order.getNote())
+                                .promotionCode(order.getPromotionCode())
+                                .discountAmount(order.getDiscountAmount())
                                 .userId(order.getUserId())
                                 .createdDate(order.getCreatedDate())
                                 .orderItems(orderItemDTOs)
@@ -142,24 +180,11 @@ public class OrderServiceImpl implements OrderService {
                         try {
                                 log.info("Processing order ID: {}", order.getId());
 
-                                for (var orderItem : order.getOrderItems()) {
-                                        if (orderItem.getPrintFileUrl() != null
-                                                        && !orderItem.getPrintFileUrl().isBlank()) {
-                                                log.info("Triggering render for OrderItem ID: {}", orderItem.getId());
-
-                                                // TODO: Build RenderRequest từ OrderItem data
-                                                // Tạm thời skip render nếu không có đủ data
-                                                // RenderResponse response =
-                                                // renderEngineService.renderDesign(renderRequest);
-                                                // orderItem.setPrintFileUrl(response.getFileUrl());
-                                        }
-                                }
-
                                 order.setStatus(OrderStatus.PAID);
                                 orderRepository.save(order);
 
                                 log.info("Successfully processed order ID: {} -> Status changed to PAID",
-                                                order.getId());
+                                                 order.getId());
                                 successCount++;
 
                         } catch (Exception e) {
@@ -169,5 +194,14 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 log.info("Scheduled task completed - Success: {}, Failed: {}", successCount, failureCount);
+        }
+
+        private Pageable buildPageable(int page, int size, String sortBy, String order) {
+                int normalizedSize = Math.min(Math.max(size, 1), 100);
+                String normalizedSortBy = List.of("id", "createdDate", "totalAmount", "status").contains(sortBy)
+                                ? sortBy
+                                : "createdDate";
+                Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+                return PageRequest.of(page > 0 ? page - 1 : 0, normalizedSize, Sort.by(direction, normalizedSortBy));
         }
 }

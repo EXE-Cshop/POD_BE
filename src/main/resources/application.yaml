@@ -1,9 +1,5 @@
 spring:
   data:
-    mongodb:
-      uri: mongodb+srv://nn0469971_db_user:vinh123456@pod.fzzmyug.mongodb.net/?appName=POD
-      database: POD
-      authentication-database: admin
   security:
     jwt:
       secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D6351
@@ -19,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: false
 
     properties:

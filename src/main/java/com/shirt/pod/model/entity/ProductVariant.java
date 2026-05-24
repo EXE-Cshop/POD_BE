@@ -17,19 +17,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class ProductVariant extends BaseEntityCreatedOnly {
-    private String colorName; // Màu Đen
-    private String colorHex; // #000000
-    private String size; // S, M, L, XL
+    private String colorName;
+    private String colorHex;
+    private String size;
     @Column(unique = true)
-    private String sku; // Mã quản lý kho (ví dụ: TEE-BLK-L)
+    private String sku;
     private Integer stockQuantity;
-    // QUAN TRỌNG: Ảnh mockup phôi màu này (Chưa có hình in)
-    // Dùng làm background cho khách kéo thả thiết kế
     private String frontImageUrl;
     private String backImageUrl;
-    private BigDecimal priceAdjustment; // Giá cộng thêm (ví dụ size XXL đắt hơn 10k)
-    private Boolean active;
+    private BigDecimal priceAdjustment;
+    @Builder.Default
+    private Boolean active = true;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "base_product_id")
-    private BaseProduct baseProduct;
+    private Product product;
 }

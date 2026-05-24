@@ -2,39 +2,37 @@ package com.shirt.pod.service.impl;
 
 import com.shirt.pod.exception.AppException;
 import com.shirt.pod.exception.ErrorCode;
+import com.shirt.pod.exception.ResourceNotFoundException;
 import com.shirt.pod.mapper.ProductMapper;
-import com.shirt.pod.model.dto.request.CreatePrintAreaRequest;
 import com.shirt.pod.model.dto.request.CreateProductRequest;
 import com.shirt.pod.model.dto.request.CreateProductVariantRequest;
-import com.shirt.pod.model.dto.request.UpdatePrintAreaRequest;
 import com.shirt.pod.model.dto.request.UpdateProductRequest;
 import com.shirt.pod.model.dto.request.UpdateProductVariantRequest;
-import com.shirt.pod.model.dto.response.PrintAreaDTO;
-import com.shirt.pod.model.dto.response.ProductDetailDTO;
-import com.shirt.pod.model.dto.response.ProductDTO;
-import com.shirt.pod.model.dto.response.ProductVariantDTO;
-import com.shirt.pod.model.entity.BaseProduct;
-import com.shirt.pod.model.entity.PrintArea;
-import com.shirt.pod.model.entity.ProductVariant;
-import com.shirt.pod.repository.BaseProductRepository;
-import com.shirt.pod.repository.PrintAreaRepository;
-import com.shirt.pod.repository.ProductVariantRepository;
+import com.shirt.pod.model.dto.response.*;
+import com.shirt.pod.model.entity.*;
+import com.shirt.pod.repository.*;
 import com.shirt.pod.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private final BaseProductRepository baseProductRepository;
+    private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final PrintAreaRepository printAreaRepository;
+    private final ProductImageRepository productImageRepository;
+    private final ReviewRepository reviewRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
 
     // ========== Product CRUD ==========
@@ -43,11 +41,13 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDTO> getAllProducts(Boolean activeOnly) {
         log.debug("Getting all products, activeOnly: {}", activeOnly);
 
-        List<BaseProduct> products;
+        List<Product> products;
         if (Boolean.TRUE.equals(activeOnly)) {
-            products = baseProductRepository.findByActiveTrue();
+            products = productRepository.findAll().stream()
+                    .filter(Product::getActive)
+                    .collect(Collectors.toList());
         } else {
-            products = baseProductRepository.findAll();
+            products = productRepository.findAll();
         }
 
         log.info("Found {} products", products.size());
@@ -55,10 +55,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductDTO> getProducts(Long categoryId, String keyword, Pageable pageable) {
+        log.debug("Getting paginated products, categoryId: {}, keyword: {}", categoryId, keyword);
+        Page<Product> productPage = productRepository.findWithFilters(categoryId, keyword, pageable);
+        return productPage.map(productMapper::toDTO);
+    }
+
+    @Override
     public ProductDTO getProductById(Long id) {
         log.debug("Getting product by id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
@@ -73,20 +80,76 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailDTO getProductDetailById(Long id) {
         log.debug("Getting product detail by id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
                 });
 
-        ProductDetailDTO dto = productMapper.toDetailDTO(product);
-        List<ProductVariant> variants = productVariantRepository.findByBaseProductId(id);
-        List<PrintArea> printAreas = printAreaRepository.findByBaseProductId(id);
-        dto.setVariants(productMapper.toVariantDTOList(variants));
-        dto.setPrintAreas(productMapper.toPrintAreaDTOList(printAreas));
+        return buildProductDetailDTO(product);
+    }
 
-        log.info("Found product detail: {} with {} variants and {} print areas",
-                product.getName(), variants.size(), printAreas.size());
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDetailDTO getProductDetailBySlug(String slug) {
+        log.debug("Getting product detail by slug: {}", slug);
+
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> {
+                    log.warn("Product not found with slug: {}", slug);
+                    return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "slug", slug);
+                });
+
+        return buildProductDetailDTO(product);
+    }
+
+    private ProductDetailDTO buildProductDetailDTO(Product product) {
+        ProductDetailDTO dto = productMapper.toDetailDTO(product);
+        
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        dto.setVariants(productMapper.toVariantDTOList(variants));
+
+        List<ProductImage> images = productImageRepository.findByProductIdOrderBySortOrderAsc(product.getId());
+        List<ProductImageDTO> imageDTOs = images.stream()
+                .map(img -> ProductImageDTO.builder()
+                        .id(img.getId())
+                        .imageUrl(img.getImageUrl())
+                        .sortOrder(img.getSortOrder())
+                        .isPrimary(img.getIsPrimary())
+                        .build())
+                .collect(Collectors.toList());
+        dto.setImages(imageDTOs);
+
+        List<Review> reviews = reviewRepository.findByProductId(product.getId());
+        List<ReviewDTO> reviewDTOs = reviews.stream()
+                .map(rev -> ReviewDTO.builder()
+                        .id(rev.getId())
+                        .productId(product.getId())
+                        .userId(rev.getUser().getId())
+                        .userName(rev.getUser().getFullName())
+                        .rating(rev.getRating())
+                        .comment(rev.getComment())
+                        .verified(rev.getVerified())
+                        .createdDate(rev.getCreatedDate())
+                        .build())
+                .collect(Collectors.toList());
+        dto.setReviews(reviewDTOs);
+
+        if (product.getCategory() != null) {
+            Category cat = product.getCategory();
+            dto.setCategory(CategoryDTO.builder()
+                    .id(cat.getId())
+                    .name(cat.getName())
+                    .slug(cat.getSlug())
+                    .description(cat.getDescription())
+                    .imageUrl(cat.getImageUrl())
+                    .sortOrder(cat.getSortOrder())
+                    .active(cat.getActive())
+                    .build());
+        }
+
+        log.info("Built product detail for product: {} with {} variants, {} images, {} reviews",
+                product.getName(), variants.size(), images.size(), reviews.size());
         return dto;
     }
 
@@ -95,14 +158,21 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO createProduct(CreateProductRequest request) {
         log.debug("Creating product: {}", request.getName());
 
-        // Check duplicate name
-        if (baseProductRepository.existsByName(request.getName())) {
-            log.warn("Product name already exists: {}", request.getName());
+        if (productRepository.existsBySlug(request.getName())) {
+            log.warn("Product slug/name already exists: {}", request.getName());
             throw new AppException(ErrorCode.DUPLICATE_NAME, request.getName());
         }
 
-        BaseProduct product = productMapper.toEntity(request);
-        BaseProduct savedProduct = baseProductRepository.save(product);
+        Product product = productMapper.toEntity(request);
+        product.setSlug(generateSlug(request.getName()));
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            product.setCategory(category);
+        }
+
+        Product savedProduct = productRepository.save(product);
 
         log.info("Created product with id: {}, name: {}", savedProduct.getId(), savedProduct.getName());
         return productMapper.toDTO(savedProduct);
@@ -113,22 +183,25 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO updateProduct(Long id, UpdateProductRequest request) {
         log.debug("Updating product with id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
                 });
 
-        // Check duplicate name (if name is being updated)
-        if (request.getName() != null && !request.getName().equals(product.getName())) {
-            if (baseProductRepository.existsByNameAndIdNot(request.getName(), id)) {
-                log.warn("Product name already exists: {}", request.getName());
-                throw new AppException(ErrorCode.DUPLICATE_NAME, request.getName());
-            }
+        productMapper.updateEntity(request, product);
+        
+        if (request.getName() != null) {
+            product.setSlug(generateSlug(request.getName()));
         }
 
-        productMapper.updateEntity(request, product);
-        BaseProduct updatedProduct = baseProductRepository.save(product);
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            product.setCategory(category);
+        }
+
+        Product updatedProduct = productRepository.save(product);
 
         log.info("Updated product with id: {}, name: {}", updatedProduct.getId(), updatedProduct.getName());
         return productMapper.toDTO(updatedProduct);
@@ -139,13 +212,13 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         log.debug("Deleting product with id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
                 });
 
-        baseProductRepository.delete(product);
+        productRepository.delete(product);
         log.info("Deleted product with id: {}, name: {}", id, product.getName());
     }
 
@@ -154,20 +227,14 @@ public class ProductServiceImpl implements ProductService {
     public void activateProduct(Long id) {
         log.debug("Activating product with id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
                 });
 
-        if (Boolean.TRUE.equals(product.getActive())) {
-            log.warn("Product {} is already active", id);
-            // Product is already active, no need to activate again
-            return;
-        }
-
         product.setActive(true);
-        baseProductRepository.save(product);
+        productRepository.save(product);
 
         log.info("Activated product with id: {}", id);
     }
@@ -177,22 +244,30 @@ public class ProductServiceImpl implements ProductService {
     public void deactivateProduct(Long id) {
         log.debug("Deactivating product with id: {}", id);
 
-        BaseProduct product = baseProductRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", id);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", id);
                 });
 
-        if (Boolean.FALSE.equals(product.getActive())) {
-            log.warn("Product {} is already inactive", id);
-            // Product is already inactive, no need to deactivate again
-            return;
-        }
-
         product.setActive(false);
-        baseProductRepository.save(product);
+        productRepository.save(product);
 
         log.info("Deactivated product with id: {}", id);
+    }
+
+    @Override
+    public List<ProductDTO> getTrendingProducts() {
+        log.debug("Getting trending products");
+        List<Product> products = productRepository.findByIsTrendingTrueAndActiveTrue();
+        return productMapper.toDTOList(products);
+    }
+
+    @Override
+    public List<ProductDTO> getFeaturedProducts() {
+        log.debug("Getting featured products");
+        List<Product> products = productRepository.findByIsFeaturedTrueAndActiveTrue();
+        return productMapper.toDTOList(products);
     }
 
     // ========== Variant Management ==========
@@ -201,13 +276,12 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductVariantDTO> getVariantsByProductId(Long productId) {
         log.debug("Getting variants for product id: {}", productId);
 
-        // Verify product exists
-        if (!baseProductRepository.existsById(productId)) {
+        if (!productRepository.existsById(productId)) {
             log.warn("Product not found with id: {}", productId);
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
         }
 
-        List<ProductVariant> variants = productVariantRepository.findByBaseProductId(productId);
+        List<ProductVariant> variants = productVariantRepository.findByProductId(productId);
         log.info("Found {} variants for product id: {}", variants.size(), productId);
         return productMapper.toVariantDTOList(variants);
     }
@@ -217,21 +291,19 @@ public class ProductServiceImpl implements ProductService {
     public ProductVariantDTO createVariant(Long productId, CreateProductVariantRequest request) {
         log.debug("Creating variant for product id: {}, SKU: {}", productId, request.getSku());
 
-        // Verify product exists
-        BaseProduct product = baseProductRepository.findById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> {
                     log.warn("Product not found with id: {}", productId);
                     return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
                 });
 
-        // Check duplicate SKU
         if (productVariantRepository.existsBySku(request.getSku())) {
             log.warn("SKU already exists: {}", request.getSku());
             throw new AppException(ErrorCode.SKU_ALREADY_EXISTS, request.getSku());
         }
 
         ProductVariant variant = productMapper.toVariantEntity(request);
-        variant.setBaseProduct(product);
+        variant.setProduct(product);
         ProductVariant savedVariant = productVariantRepository.save(variant);
 
         log.info("Created variant with id: {}, SKU: {}", savedVariant.getId(), savedVariant.getSku());
@@ -249,7 +321,6 @@ public class ProductServiceImpl implements ProductService {
                     return new AppException(ErrorCode.VARIANT_NOT_FOUND, "id", variantId);
                 });
 
-        // Check duplicate SKU (if SKU is being updated)
         if (request.getSku() != null && !request.getSku().equals(variant.getSku())) {
             if (productVariantRepository.existsBySku(request.getSku())) {
                 log.warn("SKU already exists: {}", request.getSku());
@@ -279,73 +350,11 @@ public class ProductServiceImpl implements ProductService {
         log.info("Deleted variant with id: {}, SKU: {}", variantId, variant.getSku());
     }
 
-    // ========== PrintArea Management ==========
-
-    @Override
-    public List<PrintAreaDTO> getPrintAreasByProductId(Long productId) {
-        log.debug("Getting print areas for product id: {}", productId);
-
-        // Verify product exists
-        if (!baseProductRepository.existsById(productId)) {
-            log.warn("Product not found with id: {}", productId);
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
-        }
-
-        List<PrintArea> printAreas = printAreaRepository.findByBaseProductId(productId);
-        log.info("Found {} print areas for product id: {}", printAreas.size(), productId);
-        return productMapper.toPrintAreaDTOList(printAreas);
-    }
-
-    @Override
-    @Transactional
-    public PrintAreaDTO createPrintArea(Long productId, CreatePrintAreaRequest request) {
-        log.debug("Creating print area for product id: {}, name: {}", productId, request.getName());
-
-        // Verify product exists
-        BaseProduct product = baseProductRepository.findById(productId)
-                .orElseThrow(() -> {
-                    log.warn("Product not found with id: {}", productId);
-                    return new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
-                });
-
-        PrintArea printArea = productMapper.toPrintAreaEntity(request);
-        printArea.setBaseProduct(product);
-        PrintArea savedPrintArea = printAreaRepository.save(printArea);
-
-        log.info("Created print area with id: {}, name: {}", savedPrintArea.getId(), savedPrintArea.getName());
-        return productMapper.toPrintAreaDTO(savedPrintArea);
-    }
-
-    @Override
-    @Transactional
-    public PrintAreaDTO updatePrintArea(Long printAreaId, UpdatePrintAreaRequest request) {
-        log.debug("Updating print area with id: {}", printAreaId);
-
-        PrintArea printArea = printAreaRepository.findById(printAreaId)
-                .orElseThrow(() -> {
-                    log.warn("Print area not found with id: {}", printAreaId);
-                    return new AppException(ErrorCode.PRINT_AREA_NOT_FOUND, "id", printAreaId);
-                });
-
-        productMapper.updatePrintAreaEntity(request, printArea);
-        PrintArea updatedPrintArea = printAreaRepository.save(printArea);
-
-        log.info("Updated print area with id: {}, name: {}", updatedPrintArea.getId(), updatedPrintArea.getName());
-        return productMapper.toPrintAreaDTO(updatedPrintArea);
-    }
-
-    @Override
-    @Transactional
-    public void deletePrintArea(Long printAreaId) {
-        log.debug("Deleting print area with id: {}", printAreaId);
-
-        PrintArea printArea = printAreaRepository.findById(printAreaId)
-                .orElseThrow(() -> {
-                    log.warn("Print area not found with id: {}", printAreaId);
-                    return new AppException(ErrorCode.PRINT_AREA_NOT_FOUND, "id", printAreaId);
-                });
-
-        printAreaRepository.delete(printArea);
-        log.info("Deleted print area with id: {}, name: {}", printAreaId, printArea.getName());
+    private String generateSlug(String name) {
+        return name.toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .trim();
     }
 }

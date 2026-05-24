@@ -9,10 +9,10 @@ import com.shirt.pod.model.dto.response.InventorySummaryDTO;
 import com.shirt.pod.model.dto.response.ProductInventoryDTO;
 import com.shirt.pod.model.dto.response.StockAvailabilityDTO;
 import com.shirt.pod.model.dto.response.VariantInventoryDTO;
-import com.shirt.pod.model.entity.BaseProduct;
+import com.shirt.pod.model.entity.Product;
 import com.shirt.pod.model.entity.ProductVariant;
 import com.shirt.pod.model.entity.enums.StockStatus;
-import com.shirt.pod.repository.BaseProductRepository;
+import com.shirt.pod.repository.ProductRepository;
 import com.shirt.pod.repository.ProductVariantRepository;
 import com.shirt.pod.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private static final int DEFAULT_LOW_STOCK_THRESHOLD = 10;
 
-    private final BaseProductRepository baseProductRepository;
+    private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final InventoryMapper inventoryMapper;
 
@@ -42,7 +42,7 @@ public class InventoryServiceImpl implements InventoryService {
     public InventorySummaryDTO getInventorySummary() {
         log.debug("Getting inventory summary");
 
-        long totalProducts = baseProductRepository.count();
+        long totalProducts = productRepository.count();
         long totalVariants = productVariantRepository.count();
         long outOfStockVariants = productVariantRepository.countOutOfStock();
         long lowStockVariants = productVariantRepository.countLowStock(DEFAULT_LOW_STOCK_THRESHOLD);
@@ -66,13 +66,12 @@ public class InventoryServiceImpl implements InventoryService {
     public InventorySummaryDTO getInventorySummaryByProduct(Long productId) {
         log.debug("Getting inventory summary for product id: {}", productId);
 
-        // Verify product exists
-        if (!baseProductRepository.existsById(productId)) {
+        if (!productRepository.existsById(productId)) {
             log.warn("Product not found with id: {}", productId);
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
         }
 
-        List<ProductVariant> variants = productVariantRepository.findByBaseProductId(productId);
+        List<ProductVariant> variants = productVariantRepository.findByProductId(productId);
         long totalVariants = variants.size();
         long outOfStockVariants = variants.stream()
                 .filter(v -> v.getStockQuantity() == null || v.getStockQuantity() == 0)
@@ -110,21 +109,18 @@ public class InventoryServiceImpl implements InventoryService {
 
         int threshold = lowStockThreshold != null ? lowStockThreshold : DEFAULT_LOW_STOCK_THRESHOLD;
 
-        // Get all products (or filter by name if provided)
-        List<BaseProduct> products;
+        List<Product> products;
         if (productName != null && !productName.trim().isEmpty()) {
-            products = baseProductRepository.findAll().stream()
+            products = productRepository.findAll().stream()
                     .filter(p -> p.getName() != null && p.getName().toLowerCase().contains(productName.toLowerCase()))
                     .collect(Collectors.toList());
         } else {
-            products = baseProductRepository.findAll();
+            products = productRepository.findAll();
         }
 
-        // Calculate inventory for each product
         List<ProductInventoryDTO> productInventories = products.stream()
                 .map(product -> calculateProductInventory(product, threshold))
                 .filter(dto -> {
-                    // Filter by status if provided
                     if (status == null) {
                         return true;
                     }
@@ -132,7 +128,6 @@ public class InventoryServiceImpl implements InventoryService {
                 })
                 .collect(Collectors.toList());
 
-        // Manual pagination
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), productInventories.size());
         List<ProductInventoryDTO> pagedList = start < productInventories.size()
@@ -158,24 +153,21 @@ public class InventoryServiceImpl implements InventoryService {
 
         List<ProductVariant> variants;
         if (productId != null) {
-            // Verify product exists
-            if (!baseProductRepository.existsById(productId)) {
+            if (!productRepository.existsById(productId)) {
                 log.warn("Product not found with id: {}", productId);
                 throw new AppException(ErrorCode.PRODUCT_NOT_FOUND, "id", productId);
             }
-            variants = productVariantRepository.findByBaseProductId(productId);
+            variants = productVariantRepository.findByProductId(productId);
         } else {
             variants = productVariantRepository.findAll();
         }
 
-        // Filter by SKU if provided
         if (sku != null && !sku.trim().isEmpty()) {
             variants = variants.stream()
                     .filter(v -> v.getSku() != null && v.getSku().toLowerCase().contains(sku.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
-        // Map to DTOs and calculate stock status
         List<VariantInventoryDTO> variantInventories = variants.stream()
                 .map(variant -> {
                     VariantInventoryDTO dto = inventoryMapper.toVariantInventoryDTO(variant);
@@ -186,7 +178,6 @@ public class InventoryServiceImpl implements InventoryService {
                     return dto;
                 })
                 .filter(dto -> {
-                    // Filter by status if provided
                     if (status == null) {
                         return true;
                     }
@@ -194,7 +185,6 @@ public class InventoryServiceImpl implements InventoryService {
                 })
                 .collect(Collectors.toList());
 
-        // Manual pagination
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), variantInventories.size());
         List<VariantInventoryDTO> pagedList = start < variantInventories.size()
@@ -219,7 +209,6 @@ public class InventoryServiceImpl implements InventoryService {
         Integer currentStock = variant.getStockQuantity() != null ? variant.getStockQuantity() : 0;
         Integer newStock = currentStock + request.getQuantityChange();
 
-        // Validate: stock cannot be negative
         if (newStock < 0) {
             log.warn("Stock update would result in negative stock. Current: {}, Change: {}", currentStock, request.getQuantityChange());
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK, variant.getSku(), currentStock, Math.abs(request.getQuantityChange()));
@@ -329,7 +318,12 @@ public class InventoryServiceImpl implements InventoryService {
         log.debug("Getting products with low stock variants, threshold: {}", threshold);
 
         int thresholdValue = threshold != null ? threshold : DEFAULT_LOW_STOCK_THRESHOLD;
-        List<BaseProduct> products = baseProductRepository.findProductsWithLowStock(thresholdValue);
+        List<ProductVariant> lowStockVariants = productVariantRepository.findLowStockVariants(thresholdValue);
+        
+        List<Product> products = lowStockVariants.stream()
+                .map(ProductVariant::getProduct)
+                .distinct()
+                .collect(Collectors.toList());
 
         List<ProductInventoryDTO> dtos = products.stream()
                 .map(product -> calculateProductInventory(product, thresholdValue))
@@ -339,8 +333,8 @@ public class InventoryServiceImpl implements InventoryService {
         return dtos;
     }
 
-    private ProductInventoryDTO calculateProductInventory(BaseProduct product, int threshold) {
-        List<ProductVariant> variants = productVariantRepository.findByBaseProductId(product.getId());
+    private ProductInventoryDTO calculateProductInventory(Product product, int threshold) {
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
 
         int totalVariants = variants.size();
         int inStockVariants = 0;
@@ -361,7 +355,6 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
 
-        // Determine overall stock status
         StockStatus stockStatus = null;
         if (outOfStockVariants == totalVariants) {
             stockStatus = StockStatus.OUT_OF_STOCK;
@@ -369,7 +362,6 @@ public class InventoryServiceImpl implements InventoryService {
             if (inStockVariants == 0) {
                 stockStatus = StockStatus.LOW_STOCK;
             }
-            // If mixed, stockStatus remains null
         } else {
             stockStatus = StockStatus.IN_STOCK;
         }
@@ -378,6 +370,7 @@ public class InventoryServiceImpl implements InventoryService {
         dto.setTotalVariants(totalVariants);
         dto.setInStockVariants(inStockVariants);
         dto.setOutOfStockVariants(outOfStockVariants);
+        dto.setLowStockThreshold(threshold);
         dto.setLowStockVariants(lowStockVariants);
         dto.setTotalStockQuantity(totalStockQuantity);
         dto.setStockStatus(stockStatus);

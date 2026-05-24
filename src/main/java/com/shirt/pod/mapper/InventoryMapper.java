@@ -2,7 +2,7 @@ package com.shirt.pod.mapper;
 
 import com.shirt.pod.model.dto.response.ProductInventoryDTO;
 import com.shirt.pod.model.dto.response.VariantInventoryDTO;
-import com.shirt.pod.model.entity.BaseProduct;
+import com.shirt.pod.model.entity.Product;
 import com.shirt.pod.model.entity.ProductVariant;
 import com.shirt.pod.model.entity.enums.StockStatus;
 import org.mapstruct.Mapper;
@@ -14,10 +14,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface InventoryMapper {
 
- 
     @Mapping(target = "variantId", source = "id")
-    @Mapping(target = "baseProductId", source = "baseProduct.id")
-    @Mapping(target = "baseProductName", source = "baseProduct.name")
+    @Mapping(target = "baseProductId", source = "product.id")
+    @Mapping(target = "baseProductName", source = "product.name")
     @Mapping(target = "stockStatus", ignore = true)
     @Mapping(target = "lowStockThreshold", ignore = true)
     VariantInventoryDTO toVariantInventoryDTO(ProductVariant variant);
@@ -32,10 +31,9 @@ public interface InventoryMapper {
     @Mapping(target = "lowStockVariants", ignore = true)
     @Mapping(target = "totalStockQuantity", ignore = true)
     @Mapping(target = "stockStatus", ignore = true)
-    ProductInventoryDTO toProductInventoryDTO(BaseProduct product);
+    ProductInventoryDTO toProductInventoryDTO(Product product);
 
-   
-    List<ProductInventoryDTO> toProductInventoryDTOList(List<BaseProduct> products);
+    List<ProductInventoryDTO> toProductInventoryDTOList(List<Product> products);
 
     @Named("calculateStockStatus")
     default StockStatus calculateStockStatus(Integer stockQuantity, Integer lowStockThreshold) {

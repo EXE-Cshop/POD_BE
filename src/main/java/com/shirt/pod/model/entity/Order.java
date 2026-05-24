@@ -45,7 +45,7 @@ public class Order extends BaseEntityCreatedOnly {
     private String shippingAddress;
 
     @Column(name = "payment_method")
-    private String paymentMethod; // Hoặc Enum
+    private String paymentMethod;
 
     @Column(name = "payment_status")
     private String paymentStatus;
@@ -53,9 +53,14 @@ public class Order extends BaseEntityCreatedOnly {
     private String note;
     private Long userId;
 
+    @Column(name = "promotion_code")
+    private String promotionCode;
+
+    @Column(name = "discount_amount")
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 }
-
-// Enum trạng thái đơn

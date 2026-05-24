@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
                 // not throw exception -> ok
                 Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
-                                                request.getEmail(),
+                                                request.getEmail().trim().toLowerCase(),
                                                 request.getPassword()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -80,8 +80,10 @@ public class AuthServiceImpl implements AuthService {
         @Override
         @Transactional
         public AuthResponse register(RegisterRequest request) {
-                if (userRepository.existsByEmail(request.getEmail())) {
-                        throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS, request.getEmail());
+                String normalizedEmail = request.getEmail().trim().toLowerCase();
+
+                if (userRepository.existsByEmail(normalizedEmail)) {
+                        throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS, normalizedEmail);
                 }
 
                 Role userRole = roleRepository.findByName(RoleConstant.USER.name())
@@ -92,9 +94,9 @@ public class AuthServiceImpl implements AuthService {
                 roles.add(userRole);
 
                 User user = User.builder()
-                                .email(request.getEmail())
+                                .email(normalizedEmail)
                                 .password(passwordEncoder.encode(request.getPassword()))
-                                .fullName(request.getFullName())
+                                .fullName(request.getFullName().trim())
                                 .phoneNumber(request.getPhoneNumber())
                                 .status(UserStatus.ACTIVE)
                                 // .provider("LOCAL")
@@ -127,6 +129,10 @@ public class AuthServiceImpl implements AuthService {
                 refreshToken = refreshTokenService.verifyExpiration(refreshToken);
 
                 User user = refreshToken.getUser();
+                if (!UserStatus.ACTIVE.equals(user.getStatus())) {
+                        refreshTokenService.deleteByUser(user);
+                        throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+                }
 
                 refreshTokenService.deleteRefreshToken(refreshToken);
                 RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);

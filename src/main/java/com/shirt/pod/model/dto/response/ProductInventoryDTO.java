@@ -25,4 +25,5 @@ public class ProductInventoryDTO {
     Integer lowStockVariants;      
     Integer totalStockQuantity;    
     StockStatus stockStatus;       
+    Integer lowStockThreshold;
 }

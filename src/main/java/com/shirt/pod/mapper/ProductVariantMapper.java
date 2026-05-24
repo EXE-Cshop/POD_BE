@@ -1,7 +1,7 @@
 package com.shirt.pod.mapper;
 
-import com.shirt.pod.model.dto.request.ProductVariantCreateRequest;
-import com.shirt.pod.model.dto.request.ProductVariantUpdateRequest;
+import com.shirt.pod.model.dto.request.CreateProductVariantRequest;
+import com.shirt.pod.model.dto.request.UpdateProductVariantRequest;
 import com.shirt.pod.model.dto.response.ProductVariantDTO;
 import com.shirt.pod.model.entity.ProductVariant;
 import org.mapstruct.Mapper;
@@ -14,21 +14,13 @@ import java.util.List;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductVariantMapper {
 
-    @Mapping(target = "baseProductId", source = "baseProduct.id")
-    @Mapping(target = "baseProductName", source = "baseProduct.name")
+    @Mapping(target = "baseProductId", source = "product.id")
+    @Mapping(target = "baseProductName", source = "product.name")
     ProductVariantDTO toDTO(ProductVariant variant);
 
     List<ProductVariantDTO> toDTOList(List<ProductVariant> variants);
 
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "baseProduct", ignore = true)
-//    @Mapping(target = "createdDate", ignore = true)
-//    @Mapping(target = "createdBy", ignore = true)
-    ProductVariant toEntity(ProductVariantCreateRequest request);
+    ProductVariant toEntity(CreateProductVariantRequest request);
 
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "baseProduct", ignore = true)
-//    @Mapping(target = "createdDate", ignore = true)
-//    @Mapping(target = "createdBy", ignore = true)
-    void updateEntity(ProductVariantUpdateRequest request, @MappingTarget ProductVariant variant);
+    void updateEntity(UpdateProductVariantRequest request, @MappingTarget ProductVariant variant);
 }

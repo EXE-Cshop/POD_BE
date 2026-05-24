@@ -32,5 +32,15 @@ public class UpdateProductRequest {
     @Size(max = 100, message = "Material must not exceed 100 characters")
     String material;
 
+    Long categoryId;
+
+    String imageUrl;
+
+    Boolean isTrending;
+
+    Boolean isFeatured;
+
+    String tags;
+
     Boolean active;
 }

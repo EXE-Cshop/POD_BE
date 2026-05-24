@@ -21,18 +21,17 @@ public class OrderItem extends BaseEntityCreatedOnly {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
+    @Column(name = "product_variant_id")
+    private Long productVariantId;
+
+    @Column(name = "product_name")
+    private String productName; // Snapshot tên sản phẩm tại thời điểm đặt hàng
+
+    @Column(name = "variant_info")
+    private String variantInfo; // Snapshot: "Đen / Size L"
+
     private Integer quantity;
 
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
-
-    @Column(name = "print_file_url")
-    private String printFileUrl;
-
-    @Column(name = "production_status")
-    private String productionStatus;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "custom_product_id")
-    private CustomProduct customProduct;
 }

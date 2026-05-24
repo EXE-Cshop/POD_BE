@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
-    private static final String PERMISSIONS_CLAIMS = "permissions";
+    private static final String AUTHORITIES_CLAIMS = "authorities";
     private static final String USER_ID_CLAIMS = "userid";
     private SecretKey getSigningKey() {
         byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
@@ -37,14 +37,14 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiryDate = now.plusSeconds(jwtProperties.getAccessTokenExpiration());
 
-        Set<String> permissions = authentication.getAuthorities().stream()
+        Set<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 
         return Jwts.builder()
                 .subject(userDetails.getEmail())
                 .claim(USER_ID_CLAIMS, userDetails.getId())
-                .claim(PERMISSIONS_CLAIMS, permissions)
+                .claim(AUTHORITIES_CLAIMS, authorities)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiryDate))
                 .signWith(getSigningKey(), Jwts.SIG.HS512)
@@ -55,11 +55,12 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiryDate = now.plusSeconds(jwtProperties.getAccessTokenExpiration());
 
-        Set<String> permissions = new HashSet<>();
+        Set<String> authorities = new HashSet<>();
         if (roles != null) {
             roles.forEach(role -> {
+                authorities.add("ROLE_" + role.getName());
                 if (role.getPermissions() != null) {
-                    role.getPermissions().forEach(permission -> permissions.add(permission.getName()));
+                    role.getPermissions().forEach(permission -> authorities.add(permission.getName()));
                 }
             });
         }
@@ -67,7 +68,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(email)
                 .claim(USER_ID_CLAIMS, userId)
-                .claim(PERMISSIONS_CLAIMS, permissions)
+                .claim(AUTHORITIES_CLAIMS, authorities)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiryDate))
                 .signWith(getSigningKey(), Jwts.SIG.HS512)
@@ -101,12 +102,12 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        List<String> permissions = claims.get(PERMISSIONS_CLAIMS, List.class);
-        if (permissions == null) {
+        List<String> authorities = claims.get(AUTHORITIES_CLAIMS, List.class);
+        if (authorities == null) {
             return Collections.emptyList();
         }
 
-        return permissions.stream()
+        return authorities.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }

@@ -13,9 +13,10 @@ import java.time.Instant;
 public class OrderItemDTO {
     private Long id;
     private Long orderId;
+    private Long productVariantId;
+    private String productName;
+    private String variantInfo;
     private Integer quantity;
     private BigDecimal unitPrice;
-    private String printFileUrl;
-    private String productionStatus;
     private Instant createdDate;
 }

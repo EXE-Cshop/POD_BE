@@ -11,6 +11,7 @@ import com.shirt.pod.model.entity.Role;
 import com.shirt.pod.model.entity.enums.RoleConstant;
 import com.shirt.pod.repository.PermissionRepository;
 import com.shirt.pod.repository.RoleRepository;
+import com.shirt.pod.repository.UserRepository;
 import com.shirt.pod.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final UserRepository userRepository;
     private final RoleMapper roleMapper;
 
     @Override
@@ -78,6 +80,13 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND, "id", id));
 
+        boolean systemRole = RoleConstant.SUPER_ADMIN.name().equals(role.getName())
+                || RoleConstant.USER.name().equals(role.getName());
+
+        if (systemRole && request.getName() != null && !role.getName().equals(request.getName())) {
+            throw new AppException(ErrorCode.INVALID_INPUT, "system role name");
+        }
+
         if (request.getName() != null && !request.getName().isBlank()) {
             if (!role.getName().equals(request.getName()) &&
                     roleRepository.existsByName(request.getName())) {
@@ -91,6 +100,19 @@ public class RoleServiceImpl implements RoleService {
         }
 
         if (request.getPermissionIds() != null) {
+            if (RoleConstant.SUPER_ADMIN.name().equals(role.getName())) {
+                Set<Long> allPermissionIds = permissionRepository.findAll().stream()
+                        .map(Permission::getId)
+                        .collect(Collectors.toSet());
+                if (!allPermissionIds.equals(request.getPermissionIds())) {
+                    throw new AppException(ErrorCode.INVALID_INPUT, "SUPER_ADMIN permissions are system managed");
+                }
+            }
+
+            if (RoleConstant.USER.name().equals(role.getName()) && !request.getPermissionIds().isEmpty()) {
+                throw new AppException(ErrorCode.INVALID_INPUT, "USER permissions are system managed");
+            }
+
             if (request.getPermissionIds().isEmpty()) {
                 role.getPermissions().clear();
             } else {
@@ -115,8 +137,13 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND, "id", id));
 
-        if (RoleConstant.SUPER_ADMIN.name().equals(role.getName())) {
+        if (RoleConstant.SUPER_ADMIN.name().equals(role.getName())
+                || RoleConstant.USER.name().equals(role.getName())) {
             throw new AppException(ErrorCode.CANNOT_DELETE_DEFAULT_ROLE, role.getName());
+        }
+
+        if (userRepository.existsByRoles_Id(id)) {
+            throw new AppException(ErrorCode.ROLE_IN_USE, role.getName());
         }
 
         roleRepository.delete(role);

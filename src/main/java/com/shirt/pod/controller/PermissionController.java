@@ -18,7 +18,7 @@ import static com.shirt.pod.security.SecurityConstants.PERMISSION_VIEW;
 
 
 @RestController
-@RequestMapping("/api/permissions")
+@RequestMapping("/api/v1/permissions")
 @RequiredArgsConstructor
 @Tag(name = "Permission", description = "APIs for managing permissions in the system")
 public class PermissionController {

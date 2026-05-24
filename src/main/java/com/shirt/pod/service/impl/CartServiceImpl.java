@@ -9,12 +9,10 @@ import com.shirt.pod.model.dto.response.CartDTO;
 import com.shirt.pod.model.dto.response.CartItemDTO;
 import com.shirt.pod.model.entity.Cart;
 import com.shirt.pod.model.entity.CartItem;
-import com.shirt.pod.model.entity.CustomProduct;
 import com.shirt.pod.model.entity.ProductVariant;
 import com.shirt.pod.model.entity.User;
 import com.shirt.pod.repository.CartItemRepository;
 import com.shirt.pod.repository.CartRepository;
-import com.shirt.pod.repository.CustomProductRepository;
 import com.shirt.pod.repository.ProductVariantRepository;
 import com.shirt.pod.repository.UserRepository;
 import com.shirt.pod.service.CartService;
@@ -33,7 +31,6 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final CustomProductRepository customProductRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -43,42 +40,31 @@ public class CartServiceImpl implements CartService {
 
         ProductVariant productVariant = productVariantRepository.findById(request.getProductVariantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product variant not found"));
-
-        boolean hasDesign = request.getFrontPrintUrl() != null || request.getBackPrintUrl() != null;
-        CustomProduct customProduct = null;
-
-        if (hasDesign) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-            String name = request.getCustomName() != null
-                    ? request.getCustomName()
-                    : productVariant.getBaseProduct().getName() + " - Custom Design";
-            String previewUrl = request.getFrontPrintUrl() != null
-                    ? request.getFrontPrintUrl()
-                    : request.getBackPrintUrl();
-
-            customProduct = CustomProduct.builder()
-                    .user(user)
-                    .baseProduct(productVariant.getBaseProduct())
-                    .productVariant(productVariant)
-                    .name(name)
-                    .previewImageUrl(previewUrl)
-                    .frontPrintUrl(request.getFrontPrintUrl())
-                    .backPrintUrl(request.getBackPrintUrl())
-                    .build();
-            customProduct = customProductRepository.save(customProduct);
-        }
+        ensureVariantCanBePurchased(productVariant, request.getQuantity());
 
         BigDecimal price = calculatePrice(productVariant);
-        CartItem newItem = CartItem.builder()
-                .cart(cart)
-                .productVariant(productVariant)
-                .quantity(request.getQuantity())
-                .price(price)
-                .customProduct(customProduct)
-                .build();
-        cart.addItem(newItem);
-        cartItemRepository.save(newItem);
+        
+        // Check if item already exists in cart, if so, increase quantity
+        CartItem existingItem = cart.getItems().stream()
+                .filter(item -> item.getProductVariant().getId().equals(productVariant.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (existingItem != null) {
+            int nextQuantity = existingItem.getQuantity() + request.getQuantity();
+            ensureVariantCanBePurchased(productVariant, nextQuantity);
+            existingItem.setQuantity(nextQuantity);
+            cartItemRepository.save(existingItem);
+        } else {
+            CartItem newItem = CartItem.builder()
+                    .cart(cart)
+                    .productVariant(productVariant)
+                    .quantity(request.getQuantity())
+                    .price(price)
+                    .build();
+            cart.addItem(newItem);
+            cartItemRepository.save(newItem);
+        }
 
         cartRepository.save(cart);
         return mapToCartDTO(cart);
@@ -96,25 +82,23 @@ public class CartServiceImpl implements CartService {
             throw new AppException(ErrorCode.ACCESS_DENIED);
         }
 
-        cartItem.setQuantity(request.getQuantity());
-
         if (request.getSize() != null && !request.getSize().equals(cartItem.getProductVariant().getSize())) {
             ProductVariant currentVariant = cartItem.getProductVariant();
             ProductVariant newVariant = productVariantRepository
-                    .findByBaseProductIdAndColorNameAndSizeAndActiveTrue(
-                            currentVariant.getBaseProduct().getId(),
+                    .findByProductIdAndColorNameAndSizeAndActiveTrue(
+                            currentVariant.getProduct().getId(),
                             currentVariant.getColorName(),
                             request.getSize())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Không tìm thấy size " + request.getSize() + " cho sản phẩm này"));
+            ensureVariantCanBePurchased(newVariant, request.getQuantity());
             cartItem.setProductVariant(newVariant);
             cartItem.setPrice(calculatePrice(newVariant));
-            if (cartItem.getCustomProduct() != null) {
-                cartItem.getCustomProduct().setProductVariant(newVariant);
-                customProductRepository.save(cartItem.getCustomProduct());
-            }
+        } else {
+            ensureVariantCanBePurchased(cartItem.getProductVariant(), request.getQuantity());
         }
 
+        cartItem.setQuantity(request.getQuantity());
         cartItemRepository.save(cartItem);
         return mapToCartDTO(cart);
     }
@@ -166,11 +150,24 @@ public class CartServiceImpl implements CartService {
     }
 
     private BigDecimal calculatePrice(ProductVariant productVariant) {
-        BigDecimal basePrice = productVariant.getBaseProduct().getBasePrice();
+        BigDecimal basePrice = productVariant.getProduct().getBasePrice();
         BigDecimal priceAdjustment = productVariant.getPriceAdjustment() != null 
                 ? productVariant.getPriceAdjustment() 
                 : BigDecimal.ZERO;
         return basePrice.add(priceAdjustment);
+    }
+
+    private void ensureVariantCanBePurchased(ProductVariant variant, int requestedQuantity) {
+        if (!Boolean.TRUE.equals(variant.getActive()) || !Boolean.TRUE.equals(variant.getProduct().getActive())) {
+            throw new AppException(ErrorCode.PRODUCT_ALREADY_INACTIVE, variant.getProduct().getName());
+        }
+        int available = variant.getStockQuantity() == null ? 0 : variant.getStockQuantity();
+        if (available <= 0) {
+            throw new AppException(ErrorCode.VARIANT_OUT_OF_STOCK, variant.getSku());
+        }
+        if (requestedQuantity > available) {
+            throw new AppException(ErrorCode.INSUFFICIENT_STOCK, variant.getSku(), available, requestedQuantity);
+        }
     }
 
     private CartDTO mapToCartDTO(Cart cart) {
@@ -196,18 +193,15 @@ public class CartServiceImpl implements CartService {
 
     private CartItemDTO mapToCartItemDTO(CartItem item) {
         ProductVariant variant = item.getProductVariant();
-        CustomProduct cp = item.getCustomProduct();
-        boolean isCustom = cp != null;
 
         String imageUrl = variant.getFrontImageUrl();
-        String productName = variant.getBaseProduct().getName();
-        if (isCustom) {
-            if (cp.getPreviewImageUrl() != null) imageUrl = cp.getPreviewImageUrl();
-            productName = cp.getName();
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = variant.getProduct().getImageUrl();
         }
+        String productName = variant.getProduct().getName();
 
         List<String> availableSizes = productVariantRepository
-                .findByBaseProductIdAndActiveTrue(variant.getBaseProduct().getId())
+                .findByProductIdAndActiveTrue(variant.getProduct().getId())
                 .stream()
                 .filter(v -> v.getColorName().equals(variant.getColorName()))
                 .map(ProductVariant::getSize)
@@ -229,8 +223,6 @@ public class CartServiceImpl implements CartService {
                 .quantity(item.getQuantity())
                 .subtotal(item.getSubtotal())
                 .imageUrl(imageUrl)
-                .customProductId(isCustom ? cp.getId() : null)
-                .isCustomDesign(isCustom)
                 .availableSizes(availableSizes)
                 .build();
     }

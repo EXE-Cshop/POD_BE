@@ -17,6 +17,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
+    Page<Order> findByUserId(Long userId, Pageable pageable);
+
+    Page<Order> findByUserIdAndStatus(Long userId, OrderStatus status, Pageable pageable);
+
     List<Order> findByStatus(OrderStatus status);
 
     Long countByStatus(OrderStatus status);
@@ -29,4 +33,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
     Optional<Order> findByIdWithItems(Long orderId);
+
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId AND o.userId = :userId")
+    Optional<Order> findByIdAndUserIdWithItems(Long orderId, Long userId);
 }
